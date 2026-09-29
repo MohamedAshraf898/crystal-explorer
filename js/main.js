@@ -59,6 +59,10 @@ async function main() {
     }
     if (st.viewMode !== 'building' && p.viewMode === 'building') document.body.style.cursor = '';
   });
+  // Safety net: the page itself must never scroll (iOS can shift it sideways).
+  window.addEventListener('scroll', () => {
+    if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
+  });
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') store.actions.back();
   });

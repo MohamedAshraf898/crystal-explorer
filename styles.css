@@ -40,6 +40,10 @@ body,
   margin: 0;
 }
 
+html {
+  overflow: hidden; /* the app is a fixed full-screen stage; the document never scrolls */
+}
+
 body {
   background: var(--teal-900);
   color: var(--ink);

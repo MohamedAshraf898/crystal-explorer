@@ -43,6 +43,18 @@ export function createFloorNav(store) {
     e.preventDefault();
     all[Math.max(0, Math.min(all.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1)))].focus();
   });
+  /**
+   * Phones: keep the active floor chip centred in the bottom bar. Scrolls ONLY
+   * the bar — scrollIntoView() would also scroll the page itself on iOS Safari
+   * (the whole site shifted left for the right-hand floors 4–6).
+   */
+  function centerChip(button) {
+    if (!button || list.scrollWidth <= list.clientWidth) return;
+    const l = list.getBoundingClientRect();
+    const b = button.getBoundingClientRect();
+    list.scrollTo({ left: list.scrollLeft + (b.left - l.left) - (l.width - b.width) / 2, behavior: 'smooth' });
+  }
+
   store.subscribe((st, p) => {
     if (st.hoveredFloor !== p.hoveredFloor) buttons.forEach((b, l) => flag(b, 'hovered', l === st.hoveredFloor));
     if (st.selectedFloor !== p.selectedFloor) {
@@ -51,7 +63,7 @@ export function createFloorNav(store) {
         if (l === st.selectedFloor) b.setAttribute('aria-current', 'location');
         else b.removeAttribute('aria-current');
       });
-      buttons.get(st.selectedFloor)?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      centerChip(buttons.get(st.selectedFloor));
     }
   });
   return h('nav', { className: 'floor-nav', 'aria-label': 'Floors' }, h('p', { className: 'eyebrow floor-nav__title' }, 'Floors'), list);
