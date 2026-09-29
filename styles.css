@@ -16,7 +16,7 @@
   --ink-3: #87959a;
   --line: rgba(19, 38, 45, 0.13);
   --line-strong: rgba(19, 38, 45, 0.3);
-  --glass: rgba(11, 29, 36, 0.62);
+  --glass: rgba(11, 29, 36, 0.86);
 
   --display: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
   --font: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -127,10 +127,10 @@ a {
 
 .stage__backdrop {
   position: absolute;
-  inset: -40px;
+  inset: 0;
   background-size: cover;
   background-position: center;
-  filter: blur(34px) brightness(0.55) saturate(1.1);
+  /* the image is pre-blurred and pre-darkened (assets/renders/*-bg.webp): no live filter */
 }
 
 .render-scroller {
@@ -155,9 +155,40 @@ a {
   touch-action: manipulation;
 }
 
-.render .dim {
+.photo {
+  position: absolute;
+  will-change: transform; /* own GPU layer: zooming never re-rasterises the photo */
+}
+
+.photo__img,
+.photo__dim,
+.photo__bands {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.photo__img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.photo__dim {
   fill: #07161b;
   pointer-events: none;
+  will-change: opacity; /* hover fade = compositor-only opacity change */
+  /* same soft edges as the photo (static mask, applied by the GPU) */
+  --fx: linear-gradient(to right, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.21) 1.5%, rgba(0, 0, 0, 0.51) 2.5%, rgba(0, 0, 0, 0.8) 3.5%, #000 5.5%,
+    #000 94.5%, rgba(0, 0, 0, 0.8) 96.5%, rgba(0, 0, 0, 0.51) 97.5%, rgba(0, 0, 0, 0.21) 98.5%, rgba(0, 0, 0, 0.02));
+  --fy: linear-gradient(to bottom, rgba(0, 0, 0, 0.07), rgba(0, 0, 0, 0.29) 2.5%, rgba(0, 0, 0, 0.51) 4%, rgba(0, 0, 0, 0.74) 5.7%, rgba(0, 0, 0, 0.94) 8.2%, #000 10.6%,
+    #000 89.4%, rgba(0, 0, 0, 0.94) 91.8%, rgba(0, 0, 0, 0.74) 94.3%, rgba(0, 0, 0, 0.51) 96%, rgba(0, 0, 0, 0.29) 97.5%, rgba(0, 0, 0, 0.07));
+  -webkit-mask-image: var(--fx), var(--fy);
+  -webkit-mask-composite: source-in;
+  mask-image: var(--fx), var(--fy);
+  mask-composite: intersect;
 }
 
 .band {
@@ -196,7 +227,6 @@ a {
 /* floor plan */
 .stage--plan {
   z-index: 0;
-  background: var(--paper); /* backdrop for the multiply-blended drawing */
   inset: calc(var(--topbar) + 12px) var(--stage-right) 150px 150px;
   visibility: hidden;
   opacity: 0;
@@ -214,8 +244,16 @@ a {
   touch-action: manipulation;
 }
 
-.plan-image {
-  mix-blend-mode: multiply; /* the drawing's white paper takes the page colour */
+.plan-overlay,
+.plan-outline {
+  position: absolute;
+  inset: 0 auto auto 0;
+  pointer-events: none;
+}
+
+.plan-overlay {
+  opacity: 0;
+  will-change: opacity;
 }
 
 .unit {
@@ -259,7 +297,16 @@ a {
   stroke-width: 2.5px;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
-  filter: drop-shadow(0 0 6px rgba(196, 167, 122, 0.55));
+}
+
+/* soft sand glow under the outline (a wide stroke — cheaper than a blur filter) */
+.unit-outline-halo {
+  fill: none;
+  stroke: rgba(196, 167, 122, 0.35);
+  stroke-width: 9px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
 }
 
 .floor-title {
@@ -448,9 +495,7 @@ a {
   height: 40px;
   padding: 0 16px 0 12px;
   border: 1px solid var(--line-strong);
-  background: rgba(247, 244, 239, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(247, 244, 239, 0.96);
   color: var(--ink);
   font-size: 10.5px;
   font-weight: 500;
@@ -517,10 +562,12 @@ a {
 .floor-nav__tick {
   display: block;
   height: 1px;
-  width: 14px;
+  width: 42px;
   background: currentColor;
   opacity: 0.6;
-  transition: width 0.45s var(--ease), opacity 0.3s var(--ease);
+  transform: scaleX(0.333); /* animate transform, not width: no layout per frame */
+  transform-origin: left center;
+  transition: transform 0.45s var(--ease), opacity 0.3s var(--ease);
 }
 
 .floor-nav__meta {
@@ -540,7 +587,7 @@ a {
 
 .floor-nav__item:hover .floor-nav__tick,
 .floor-nav__item[data-hovered] .floor-nav__tick {
-  width: 30px;
+  transform: scaleX(0.714);
   opacity: 1;
 }
 
@@ -550,7 +597,7 @@ a {
 }
 
 .floor-nav__item[data-active] .floor-nav__tick {
-  width: 42px;
+  transform: scaleX(1);
   opacity: 1;
 }
 
@@ -573,8 +620,6 @@ a {
   padding: 4px;
   border: 1px solid rgba(255, 255, 255, 0.28);
   background: var(--glass);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   color: #fff;
 }
 
@@ -620,9 +665,7 @@ a {
   gap: 16px;
   min-width: 170px;
   padding: 14px 18px;
-  background: rgba(247, 244, 239, 0.94);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(247, 244, 239, 0.985);
   border: 1px solid var(--line-strong);
   color: var(--ink);
   opacity: 0;
@@ -707,9 +750,7 @@ a {
 
 .floor-panel,
 .details {
-  background: rgba(247, 244, 239, 0.94);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: rgba(247, 244, 239, 0.985);
   border: 1px solid var(--line);
   color: var(--ink);
 }
@@ -1247,9 +1288,7 @@ a {
     gap: 12px;
     height: calc(72px + env(safe-area-inset-bottom));
     padding: 0 12px env(safe-area-inset-bottom) 16px;
-    background: rgba(247, 244, 239, 0.94);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: rgba(247, 244, 239, 0.985);
     border-top: 1px solid var(--line);
     color: var(--ink);
     transition: transform 0.5s var(--ease);

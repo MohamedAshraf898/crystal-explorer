@@ -26,14 +26,14 @@ export function createDirector({ store, building, plan, floorTitle }) {
   function animateFloorSelect(level) {
     busy?.kill();
     const layer = building.layer;
-    const [cx, cy] = building.bandCenter(level);
+    const origin = building.bandOrigin(level);
     plan.setFloor(level);
     floorTitle.set(level);
     building.highlight(level);
 
     const tl = gsap.timeline();
     tl.to(layer.dim, { opacity: 0.8, duration: 0.6, ease: 'power2.out' }, 0)
-      .to(layer.zoom, { scale: 1.32, svgOrigin: `${cx} ${cy}`, duration: 1.5, ease: EASE }, 0)
+      .to(layer.zoom, { scale: 1.32, transformOrigin: origin, duration: 1.5, ease: EASE }, 0)
       .to(building.element, { autoAlpha: 0, duration: 0.7, ease: 'power2.in' }, 0.75)
       .fromTo(plan.element, { autoAlpha: 0, scale: 0.94 }, { autoAlpha: 1, scale: 1, duration: 1.1, ease: 'expo.out' }, 1.05)
       .add(floorTitle.animateIn(), 1.15);
@@ -98,7 +98,7 @@ export function createDirector({ store, building, plan, floorTitle }) {
   /* ── intro ───────────────────────────────────────────────────────────── */
   function animateIntro() {
     const layer = building.layer;
-    gsap.fromTo(layer.zoom, { scale: 1.08, svgOrigin: `${layer.view.width / 2} ${layer.view.height / 2}` }, { scale: 1, duration: 3.2, ease: 'power2.out' });
+    gsap.fromTo(layer.zoom, { scale: 1.08, transformOrigin: '50% 50%' }, { scale: 1, duration: 3.2, ease: 'power2.out' });
     gsap.fromTo('.topbar, .floor-nav, .view-switch', { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.1, delay: 0.5, clearProps: 'transform' });
   }
 

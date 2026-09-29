@@ -50,6 +50,18 @@ export const isTouch = media('(hover: none), (pointer: coarse)');
 
 export const pointsAttr = (poly) => poly.map(([x, y]) => `${x},${y}`).join(' ');
 
+/** Keep decoded images referenced so the browser keeps them warm in its cache. */
+const warm = [];
+
+/** Fetch + decode an image off the main thread; resolves when ready (never rejects). */
+export function decodeImage(src) {
+  const img = new Image();
+  img.decoding = 'async';
+  img.src = src;
+  warm.push(img);
+  return img.decode().catch(() => {});
+}
+
 /** Load an image; resolves when decoded (used by the loader and view switching). */
 export function preload(src) {
   return new Promise((resolve) => {

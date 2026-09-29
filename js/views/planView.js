@@ -7,8 +7,12 @@ import { flag, h, isMobile, pointsAttr, s } from '../lib/dom.js';
 /**
  * PLAN VIEW — the architect's floor plan with every apartment outlined as an
  * interactive polygon (outlines were extracted from the drawing itself).
- * Hover / tap highlights a unit and darkens the rest through a mask;
- * selecting a unit animates the SVG viewBox into it like a camera move.
+ * Hover / tap highlights a unit and darkens the rest; selecting a unit
+ * animates the SVG viewBox into it like a camera move.
+ *
+ * Performance: the plan images are pre-cropped and pre-tinted to the page
+ * colour (no blend mode), and the darkening / outline live in a separate
+ * overlay SVG whose opacity is animated — no SVG masks or filters.
  */
 export function createPlanView(store) {
   const root = h('div', { className: 'stage stage--plan' });
@@ -16,19 +20,20 @@ export function createPlanView(store) {
   root.append(scroller);
 
   const image = s('image', { className: 'plan-image', preserveAspectRatio: 'none' });
-  const hole = s('polygon', { fill: 'black', points: '' });
-  const dim = s('rect', { className: 'plan-dim', mask: 'url(#plan-mask)', opacity: 0 });
-  const maskRect = s('rect', { fill: 'white' });
   const units = s('g', { className: 'units' });
-  const mask = s('mask', { id: 'plan-mask', maskUnits: 'userSpaceOnUse', x: 0, y: 0 }, maskRect, hole);
+  const dimPath = s('path', { className: 'plan-dim', 'fill-rule': 'evenodd', d: '' });
+  const halo = s('polygon', { className: 'unit-outline-halo', points: '' });
   const outline = s('polygon', { className: 'unit-outline', points: '' });
+  // Overlay: its own layer, so fading the dim is a compositor-only opacity change.
+  const overlay = s('svg', { className: 'plan plan-overlay', preserveAspectRatio: 'xMidYMid meet', 'aria-hidden': 'true' }, dimPath);
+  const outlineSvg = s('svg', { className: 'plan plan-outline', preserveAspectRatio: 'xMidYMid meet', 'aria-hidden': 'true' }, halo, outline);
+  const dim = overlay;
   const svg = s(
     'svg',
     { className: 'plan', preserveAspectRatio: 'xMidYMid meet', role: 'img' },
     s(
       'defs',
       {},
-      mask,
       s('pattern', { id: 'hatch-reserved', width: 26, height: 26, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, s('line', { x1: 0, y1: 0, x2: 0, y2: 26, className: 'hatch-line' })),
       s(
         'pattern',
@@ -39,16 +44,20 @@ export function createPlanView(store) {
     ),
     image,
     units,
-    dim,
-    outline,
   );
-  scroller.append(svg);
+  scroller.append(svg, overlay, outlineSvg);
 
   let planId = null;
   let floorLevel = null;
   const polygons = new Map();
   const vb = { x: 0, y: 0, w: 1, h: 1 };
-  const applyViewBox = () => svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  const applyViewBox = () => {
+    const v = `${vb.x} ${vb.y} ${vb.w} ${vb.h}`;
+    svg.setAttribute('viewBox', v);
+    overlay.setAttribute('viewBox', v);
+    outlineSvg.setAttribute('viewBox', v);
+  };
+  let outerD = '';
 
   /** Show the plan of a floor (re-uses the image when two floors share a plan). */
   function setFloor(level) {
@@ -58,13 +67,12 @@ export function createPlanView(store) {
     const plan = plans[floor.plan];
     if (planId !== floor.plan) {
       planId = floor.plan;
+      // The image file is cropped to the drawing ("content"); place it there so
+      // apartment outlines (in full-plan pixels) still line up exactly.
+      const [cx, cy, cw, ch] = plan.content;
       image.setAttribute('href', isMobile.matches ? plan.imageSmall : plan.image);
-      image.setAttribute('width', plan.width);
-      image.setAttribute('height', plan.height);
-      for (const el of [maskRect, dim, mask]) {
-        el.setAttribute('width', plan.width);
-        el.setAttribute('height', plan.height);
-      }
+      for (const [k, v] of Object.entries({ x: cx, y: cy, width: cw, height: ch })) image.setAttribute(k, v);
+      outerD = `M${cx - 5000},${cy - 5000}h${cw + 10000}v${ch + 10000}h${-(cw + 10000)}Z`;
     }
     // Units of THIS floor (statuses differ between floors sharing a plan).
     units.replaceChildren();
@@ -114,8 +122,9 @@ export function createPlanView(store) {
   function highlight(id) {
     polygons.forEach((poly, key) => flag(poly, 'active', key === id));
     const points = id ? polygons.get(id)?.getAttribute('points') ?? '' : '';
-    if (points) hole.setAttribute('points', points);
+    if (points) dimPath.setAttribute('d', `${outerD}M${points.replaceAll(' ', 'L')}Z`);
     outline.setAttribute('points', points);
+    halo.setAttribute('points', points);
   }
 
   /* ── pointer interaction ─────────────────────────────────────────────── */

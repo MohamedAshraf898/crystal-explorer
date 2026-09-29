@@ -1,6 +1,7 @@
+import { plans } from './data/plans.js';
 import { views } from './data/project.js';
 import { createDirector } from './director.js';
-import { h, preload } from './lib/dom.js';
+import { decodeImage, h, isMobile, preload } from './lib/dom.js';
 import { createStore } from './state.js';
 import { createDetails } from './ui/details.js';
 import { createFloorNav } from './ui/floorNav.js';
@@ -73,9 +74,17 @@ async function main() {
   const critical = [small ? first.imageSmall : first.image, 'assets/brand/crystal-white.png'];
   let loaded = 0;
   await Promise.all(critical.map((src) => preload(src).then(() => loader.progress((++loaded / critical.length) * 100))));
+  await building.ready; // first photo decoded and laid out
   await loader.done();
   store.actions.setReady();
-  views.filter((v) => v !== first).forEach((v) => preload(small ? v.imageSmall : v.image));
+
+  // Warm the cache while the visitor looks at the building: other photos, then the
+  // floor plans — decoded ahead of time so opening a floor doesn't stall on a decode.
+  const idle = window.requestIdleCallback ?? ((fn) => setTimeout(fn, 800));
+  idle(async () => {
+    for (const v of views.filter((v) => v !== first)) await decodeImage(small ? v.imageSmall : v.image);
+    for (const p of Object.values(plans)) await decodeImage(isMobile.matches ? p.imageSmall : p.image);
+  });
 }
 
 main();
