@@ -27,8 +27,8 @@ export function createTopBar(store) {
     h(
       'a',
       { className: 'brand', href: './', 'aria-label': `${project.name} ${project.location} — home` },
-      h('img', { className: 'brand__logo brand__logo--light', src: 'assets/brand/crystal-white.png', alt: '', width: 441, height: 420 }),
-      h('img', { className: 'brand__logo brand__logo--dark', src: 'assets/brand/crystal-dark.png', alt: '', width: 441, height: 420 }),
+      h('img', { className: 'brand__logo brand__logo--light', src: 'assets/brand/crystal-white.png', alt: '', width: 792, height: 1046 }),
+      h('img', { className: 'brand__logo brand__logo--dark', src: 'assets/brand/crystal-dark.png', alt: '', width: 792, height: 1046 }),
     ),
     h('nav', { className: 'crumbs', 'aria-label': 'Breadcrumb' }, crumbs),
     h(

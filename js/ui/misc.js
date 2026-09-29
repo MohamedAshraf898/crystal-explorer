@@ -62,7 +62,7 @@ export function createLoader() {
   const content = h(
     'div',
     { className: 'loader__content' },
-    h('img', { className: 'loader__logo', src: 'assets/brand/crystal-white.png', alt: '', width: 441, height: 420 }),
+    h('img', { className: 'loader__logo', src: 'assets/brand/crystal-white.png', alt: '', width: 792, height: 1046 }),
     h('div', { className: 'loader__bar' }, bar),
     h('div', { className: 'loader__row' }, h('span', {}, `${project.developer}`), count),
   );

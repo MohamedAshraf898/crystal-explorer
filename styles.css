@@ -383,8 +383,9 @@ a {
 }
 
 .brand__logo {
-  height: 58px;
+  height: 64px;
   width: auto;
+  display: block;
 }
 
 .dev-logo {
@@ -1187,7 +1188,7 @@ a {
 }
 
 .loader__logo {
-  width: 170px;
+  width: 124px;
   height: auto;
 }
 
@@ -1265,7 +1266,7 @@ a {
   }
 
   .brand__logo {
-    height: 44px;
+    height: 50px;
   }
 
   .hotline {
