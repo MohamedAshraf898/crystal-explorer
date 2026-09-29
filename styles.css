@@ -138,6 +138,14 @@ a {
   inset: 0;
 }
 
+/* Desktop: keep the facade clear of the floor list on the left. */
+@media (min-width: 768px) {
+  .render-scroller {
+    left: 140px;
+    right: 16px;
+  }
+}
+
 .render {
   position: absolute;
   inset: 0;
@@ -1313,7 +1321,7 @@ a {
   }
 
   .render {
-    width: 210vw; /* photo ~2× the screen width; swipe to see the whole facade */
+    width: 250vw; /* photo wider than the screen; swipe to see the whole facade */
     height: 100%;
     inset: 0 auto auto 0;
   }

@@ -12,7 +12,7 @@ You can't just double-click `index.html`, because browsers block JavaScript modu
 
 ## How it works
 
-1. **Building:** the real render fills the screen. Each of the 6 residential floors is an invisible band traced on the photo. Hovering (or tapping) a floor darkens everything else through an SVG mask, so the highlight is the real facade. Switch between **Day / Night / Pool side**.
+1. **Building:** the real render fills the screen. Each of the 6 residential floors is an invisible band traced on the photo. Hovering (or tapping) a floor darkens everything else through an SVG mask, so the highlight is the real facade. The main photo is the night render (03.jpg); switch to **Day** for the same view in daylight.
 2. **Click a floor:** the camera zooms into that floor on the photo, then the architect's plan for that floor appears.
 3. **Floor plan:** every apartment is outlined on the real drawing. Hover or tap to see the number, size and status. The side list offers the same actions.
 4. **Click an apartment:** the plan zooms into it and the details panel opens. It shows a sharp crop of that apartment's plan, size, floor, status, price, and a request-information form.
@@ -40,7 +40,7 @@ To send inquiries to your CRM or email, replace `submitInquiry()` in `js/lib/api
 
 | What | Source | File |
 |---|---|---|
-| Building photos | `AFTER EDIT` renders (day, night, pool side, detail) | `assets/renders/` |
+| Building photos | `03.jpg` (night, main), `13.jpg` (day, same camera), `3` (street view in the apartment panel) | `assets/renders/` |
 | Floor plans | `Floor Plans Updated (3).pdf`: First, Second & Third, Fourth, Fifth & Sixth | `assets/plans/` |
 | Apartment numbers, sizes and outlines | Read from the plans (the red "Apartment N · XX m²" labels). Outlines were traced from the plan walls. | `js/data/plans.js` |
 | Apartment plan crops | Cut from the full-resolution plans | `assets/units/` |
@@ -51,7 +51,7 @@ Floors 2 & 3 share one plan, and floors 5 & 6 share another, as in the PDF. That
 ## Customise
 
 - **Project name, hotline, website, delivery year:** `js/data/project.js`
-- **Floor positions on each photo:** the `views` list in `js/data/project.js`. Each view has the facade's `left`/`right` edge and the 7 `slabs` y-values (in image pixels, from the bottom of floor 1 up to the roof). Add `?debug` to the URL to see the traced bands and apartment outlines in red.
+- **Floor positions on each photo:** the `views` list in `js/data/project.js`. Each view has one traced polygon per floor (`floorBands`, in image pixels), following the slabs and the stepped facade. Add `?debug` to the URL to see the traced bands and apartment outlines in red.
 - **Add a photo:** add it to `assets/renders/` and a new entry to `views`.
 - **Colours and fonts:** the variables at the top of `styles.css`.
 

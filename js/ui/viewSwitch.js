@@ -2,7 +2,7 @@ import { views } from '../data/project.js';
 import gsap from 'gsap';
 import { h } from '../lib/dom.js';
 
-/** Day / Night / Pool-side switcher for the building photo. */
+/** Night / Day switcher for the building photo. */
 export function createViewSwitch(store) {
   const buttons = views.map((v) =>
     h('button', { type: 'button', className: 'view-switch__btn', 'aria-pressed': String(v.id === store.get().view), onClick: () => store.actions.setView(v.id) }, v.label),

@@ -9,17 +9,9 @@ import { flag, h, isMobile, pointsAttr, s } from '../lib/dom.js';
  * so the highlight is the real facade, not a drawing.
  */
 
-/** Band polygon for a floor on a given view (image pixel coordinates). */
+/** Traced polygon of a floor on a given view (image pixel coordinates). */
 export function bandPolygon(view, level) {
-  const i = level - 1;
-  const bottom = view.slabs[i];
-  const top = view.slabs[i + 1];
-  return [
-    [view.left, top],
-    [view.right, top],
-    [view.right, bottom],
-    [view.left, bottom],
-  ];
+  return view.floorBands[level - 1];
 }
 
 export function createBuildingView(store) {
@@ -52,14 +44,29 @@ export function createBuildingView(store) {
     const zoom = s(
       'g',
       { className: 'zoom' },
-      s('image', { href: useSmall() ? view.imageSmall : view.image, width: view.width, height: view.height, preserveAspectRatio: 'none' }),
-      dim,
+      s(
+        'g',
+        { mask: `url(#${id}-edge)` },
+        s('image', { href: useSmall() ? view.imageSmall : view.image, width: view.width, height: view.height, preserveAspectRatio: 'none' }),
+        dim,
+      ),
       bandGroup,
     );
     const svg = s(
       'svg',
       { className: 'render', viewBox: `0 0 ${view.width} ${view.height}`, preserveAspectRatio: fit(view) },
-      s('defs', {}, s('mask', { id, maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: view.width, height: view.height }, s('rect', { width: view.width, height: view.height, fill: 'white' }), hole)),
+      s(
+        'defs',
+        {},
+        s('mask', { id, maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: view.width, height: view.height }, s('rect', { width: view.width, height: view.height, fill: 'white' }), hole),
+        // Feathered photo edges so the render melts into the blurred backdrop.
+        s('filter', { id: `${id}-feather`, x: '-10%', y: '-10%', width: '120%', height: '120%' }, s('feGaussianBlur', { stdDeviation: view.width * 0.012 })),
+        s(
+          'mask',
+          { id: `${id}-edge`, maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: view.width, height: view.height },
+          s('rect', { x: view.width * 0.025, y: view.height * 0.04, width: view.width * 0.95, height: view.height * 0.92, fill: 'white', filter: `url(#${id}-feather)` }),
+        ),
+      ),
       zoom,
     );
     return { view, svg, zoom, dim, hole, bands };
@@ -68,7 +75,8 @@ export function createBuildingView(store) {
   /** Fill the screen when the screen is wider than the photo, otherwise show it whole over a blurred backdrop. */
   function fit(view) {
     if (isMobile.matches) return 'xMidYMid meet';
-    return window.innerWidth / window.innerHeight >= view.width / view.height ? 'xMidYMid slice' : 'xMidYMid meet';
+    const box = scroller.getBoundingClientRect();
+    return box.width / Math.max(1, box.height) >= view.width / view.height ? 'xMidYMid slice' : 'xMidYMid meet';
   }
 
   function show(viewId, animate) {
@@ -134,7 +142,9 @@ export function createBuildingView(store) {
     /** Centre of a band in image coordinates (zoom origin for the transition). */
     bandCenter(level) {
       const poly = bandPolygon(layer.view, level);
-      return [(poly[0][0] + poly[1][0]) / 2, (poly[0][1] + poly[2][1]) / 2];
+      const xs = poly.map((p) => p[0]);
+      const ys = poly.map((p) => p[1]);
+      return [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
     },
   };
 }
