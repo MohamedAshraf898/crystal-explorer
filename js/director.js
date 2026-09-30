@@ -115,7 +115,11 @@ export function createDirector({ store, building, plan, floorTitle }) {
       else if (st.selectedFloor !== prev.selectedFloor && st.viewMode !== 'building') animateFloorSwitch(st.selectedFloor);
 
       if (st.viewMode === 'apartment' && st.selectedApartment !== prev.selectedApartment) {
-        if (prev.viewMode === 'building') gsap.delayedCall(1.6, () => animateApartmentSelect(st.selectedApartment));
+        const id = st.selectedApartment;
+        const later = () => store.get().selectedApartment === id && animateApartmentSelect(id); // skip if changed meanwhile
+        if (prev.viewMode === 'building') gsap.delayedCall(1.6, later);
+        // another floor (from the finder / compare): wait until the plan has switched
+        else if (st.selectedFloor !== prev.selectedFloor) gsap.delayedCall(0.45, later);
         else animateApartmentSelect(st.selectedApartment);
       } else if (st.viewMode === 'floor' && prev.viewMode === 'apartment' && st.selectedFloor === prev.selectedFloor) {
         animateApartmentReset();

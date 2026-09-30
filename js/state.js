@@ -9,6 +9,8 @@ import { floors, views } from './data/project.js';
  * there is exactly one implementation of each interaction.
  * Listeners receive (state, previous) so the director can pick animations.
  */
+export const COMPARE_MAX = 3;
+
 export function createStore() {
   let state = {
     viewMode: 'building', // 'building' | 'floor' | 'apartment'
@@ -19,6 +21,8 @@ export function createStore() {
     hoveredApartment: null,
     hoverSource: null, // 'pointer' | 'touch' | 'ui'
     filters: { area: null, price: null }, // each [min, max] or null — independent, combinable
+    compare: [], // apartment ids picked for side-by-side comparison (max COMPARE_MAX)
+    compareOpen: false,
     ready: false,
   };
   const listeners = new Set();
@@ -53,7 +57,7 @@ export function createStore() {
     selectApartment(id) {
       const apt = apartmentsById.get(id);
       if (!apt || apt.status === 'sold') return;
-      set({ viewMode: 'apartment', selectedFloor: apt.floor, selectedApartment: id, hoveredFloor: null, hoveredApartment: null, hoverSource: null });
+      set({ viewMode: 'apartment', selectedFloor: apt.floor, selectedApartment: id, hoveredFloor: null, hoveredApartment: null, hoverSource: null, compareOpen: false });
     },
     backToFloor() {
       if (state.viewMode === 'apartment') set({ viewMode: 'floor', selectedApartment: null, hoveredApartment: null, hoverSource: null });
@@ -62,6 +66,7 @@ export function createStore() {
       set({ viewMode: 'building', selectedFloor: null, selectedApartment: null, hoveredFloor: null, hoveredApartment: null, hoverSource: null });
     },
     back() {
+      if (state.compareOpen) return actions.closeCompare();
       if (state.viewMode === 'apartment') actions.backToFloor();
       else if (state.viewMode === 'floor') actions.backToBuilding();
     },
@@ -71,6 +76,23 @@ export function createStore() {
     /** Set one filter ('area' | 'price') to [min, max], or null to switch it off. */
     setFilter(key, range) {
       set({ filters: { ...state.filters, [key]: range } });
+    },
+    /** Add / remove an apartment from the comparison (ignored when full). */
+    toggleCompare(id) {
+      if (!apartmentsById.has(id)) return;
+      if (state.compare.includes(id)) {
+        const compare = state.compare.filter((x) => x !== id);
+        set({ compare, compareOpen: state.compareOpen && compare.length > 0 });
+      } else if (state.compare.length < COMPARE_MAX) set({ compare: [...state.compare, id] });
+    },
+    clearCompare() {
+      set({ compare: [], compareOpen: false });
+    },
+    openCompare() {
+      if (state.compare.length) set({ compareOpen: true, hoveredApartment: null, hoveredFloor: null, hoverSource: null });
+    },
+    closeCompare() {
+      set({ compareOpen: false });
     },
     clearFilters() {
       set({ filters: { area: null, price: null } });

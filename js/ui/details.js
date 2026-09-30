@@ -1,7 +1,9 @@
 import gsap from 'gsap';
 import { apartmentsById, pricing } from '../data/apartments.js';
 import { detailImage, floors, project } from '../data/project.js';
-import { h, isMobile, pointsAttr, render, s } from '../lib/dom.js';
+import { h, isMobile, render } from '../lib/dom.js';
+import { COMPARE_MAX } from '../state.js';
+import { unitFigure } from './unitFigure.js';
 import { formatArea, formatPrice, pad2 } from '../lib/format.js';
 import { createInquiryForm } from './inquiry.js';
 import { statusBadge } from './status.js';
@@ -18,21 +20,6 @@ export function createDetails(store) {
   let tab = 'summary';
   let visible = false;
   let variant = 'side';
-
-  function unitFigure(a) {
-    const c = a.unit.crop;
-    return h(
-      'figure',
-      { className: 'unit-figure' },
-      s(
-        'svg',
-        { viewBox: `${c.x} ${c.y} ${c.w} ${c.h}`, role: 'img', 'aria-label': `Floor plan of apartment ${a.number}` },
-        s('image', { href: c.src, x: c.x, y: c.y, width: c.w, height: c.h, preserveAspectRatio: 'none' }),
-        s('polygon', { className: 'unit-figure__outline', points: pointsAttr(a.unit.poly) }),
-      ),
-      h('figcaption', {}, `Apartment ${a.number} · plan for illustration`),
-    );
-  }
 
   function build(replay) {
     if (!apt) return;
@@ -105,6 +92,7 @@ export function createDetails(store) {
               h('button', { type: 'button', className: 'btn btn--ghost', 'aria-expanded': String(tab === 'details'), onClick: () => setTab(tab === 'details' ? 'summary' : 'details') }, tab === 'details' ? 'Hide details' : 'View details'),
               h('button', { type: 'button', className: 'btn btn--solid', disabled: sold, onClick: () => setTab('inquiry') }, a.status === 'reserved' ? 'Join waitlist' : 'Request information', h('span', { className: 'btn__arrow', 'aria-hidden': 'true' }, '→')),
             ),
+            compareRow(a),
             h('a', { className: 'details__call', href: `tel:${project.hotline}`, 'data-reveal': true }, `Call ${project.hotline}`),
           );
 
@@ -125,6 +113,24 @@ export function createDetails(store) {
       const items = body.querySelectorAll('[data-reveal]');
       if (items.length) gsap.fromTo(items, { y: 10, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5, stagger: 0.04, ease: 'power3.out' });
     }
+  }
+
+  /** "Add to compare" + a shortcut to the comparison once two are picked. */
+  function compareRow(a) {
+    const { compare } = store.get();
+    const inList = compare.includes(a.id);
+    const full = !inList && compare.length >= COMPARE_MAX;
+    return h(
+      'div',
+      { className: 'details__compare', 'data-reveal': true },
+      h(
+        'button',
+        { type: 'button', className: 'compare-toggle', 'aria-pressed': String(inList), disabled: full, onClick: () => actions.toggleCompare(a.id) },
+        h('span', { className: 'compare-toggle__box', 'aria-hidden': 'true' }),
+        inList ? 'Added to compare' : full ? `Compare is full (${COMPARE_MAX})` : 'Add to compare',
+      ),
+      compare.length >= 2 && h('button', { type: 'button', className: 'details__compare-open', onClick: () => actions.openCompare() }, `Compare ${compare.length} →`),
+    );
   }
 
   const closeIcon = () => {
@@ -184,6 +190,11 @@ export function createDetails(store) {
   }
 
   store.subscribe((st, p) => {
+    if (st.compare !== p.compare && apt && visible && st.selectedApartment === p.selectedApartment) {
+      // refresh only the compare row, keep scroll position and tab
+      const old = root.querySelector('.details__compare');
+      if (old) old.replaceWith(compareRow(apt));
+    }
     if (st.selectedApartment === p.selectedApartment) return;
     const next = apartmentsById.get(st.selectedApartment) ?? null;
     if (next) {

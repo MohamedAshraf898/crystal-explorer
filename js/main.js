@@ -3,6 +3,7 @@ import { views } from './data/project.js';
 import { createDirector } from './director.js';
 import { decodeImage, h, isMobile, preload } from './lib/dom.js';
 import { createStore } from './state.js';
+import { createCompare } from './ui/compare.js';
 import { createDetails } from './ui/details.js';
 import { createFilters } from './ui/filters.js';
 import { createFloorNav } from './ui/floorNav.js';
@@ -37,6 +38,7 @@ async function main() {
   const ui = h('div', { className: 'ui' });
   const topBar = createTopBar(store);
   const filters = createFilters(store);
+  const compare = createCompare(store);
   topBar.querySelector('.topbar__end').prepend(filters.button);
   ui.append(
     topBar,
@@ -47,6 +49,8 @@ async function main() {
     createFloorPanel(store),
     createDetails(store),
     filters.panel,
+    compare.tray,
+    compare.view,
     createHint(store),
     createLiveRegion(store),
   );

@@ -2,6 +2,7 @@ import gsap from 'gsap';
 import { apartments, hasFilters, matchesFilters, ranges } from '../data/apartments.js';
 import { flag, h, isMobile, render } from '../lib/dom.js';
 import { bedsLabel, formatArea, formatMillions, formatPriceShort, pad2 } from '../lib/format.js';
+import { COMPARE_MAX } from '../state.js';
 import { statusIcon } from './status.js';
 
 /**
@@ -126,6 +127,7 @@ export function createFilters(store) {
   /* ── results ─────────────────────────────────────────────────────────── */
   function update(filters) {
     const active = hasFilters(filters);
+    compareButtons.clear();
     const list = apartments.filter((a) => matchesFilters(a, filters)).sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity) || a.area - b.area);
     const n = [filters.price, filters.area].filter(Boolean).length;
     count.textContent = n ? String(n) : '';
@@ -138,7 +140,7 @@ export function createFilters(store) {
         ? list.map((a) =>
             h(
               'li',
-              {},
+              { className: 'finder__item' },
               h(
                 'button',
                 {
@@ -153,10 +155,29 @@ export function createFilters(store) {
                 h('span', { className: 'result__price' }, formatPriceShort(a.price)),
                 h('span', { className: 'result__status' }, statusIcon(a.status)),
               ),
+              compareButton(a),
             ),
           )
         : h('li', { className: 'finder__empty' }, 'No apartments match. Widen a range or switch a filter off.'),
     );
+  }
+
+  /* ── compare toggles on each result ──────────────────────────────────── */
+  const compareButtons = new Map();
+  function compareButton(a) {
+    const b = h('button', { type: 'button', className: 'result__compare', onClick: () => actions.toggleCompare(a.id) }, h('span', { className: 'compare-toggle__box', 'aria-hidden': 'true' }));
+    compareButtons.set(a.id, b);
+    syncCompareButton(a.id, b, store.get().compare);
+    return b;
+  }
+  function syncCompareButton(id, b, compare) {
+    const on = compare.includes(id);
+    const full = !on && compare.length >= COMPARE_MAX;
+    b.setAttribute('aria-pressed', String(on));
+    b.disabled = full;
+    const apt = apartments.find((x) => x.id === id);
+    b.setAttribute('aria-label', `${on ? 'Remove' : 'Add'} apartment ${apt.number}, floor ${apt.floor} ${on ? 'from' : 'to'} compare`);
+    b.title = on ? 'Remove from compare' : full ? `Compare up to ${COMPARE_MAX} apartments` : 'Add to compare';
   }
 
   /* ── open / close ────────────────────────────────────────────────────── */
@@ -185,7 +206,8 @@ export function createFilters(store) {
 
   store.subscribe((st, p) => {
     // Opening an apartment (from the list, the plan or anywhere) closes the finder.
-    if (st.selectedApartment && st.selectedApartment !== p.selectedApartment) setOpen(false);
+    if ((st.selectedApartment && st.selectedApartment !== p.selectedApartment) || (st.compareOpen && !p.compareOpen)) setOpen(false);
+    if (st.compare !== p.compare) compareButtons.forEach((b, id) => syncCompareButton(id, b, st.compare));
     if (st.filters !== p.filters) {
       update(st.filters);
       controls.forEach((c, i) => {
