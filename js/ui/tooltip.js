@@ -1,7 +1,7 @@
 import { apartmentsById, floorSummary } from '../data/apartments.js';
 import { floors } from '../data/project.js';
 import { flag, h, render } from '../lib/dom.js';
-import { formatArea, pad2 } from '../lib/format.js';
+import { bedsLabel, formatArea, formatPriceShort, pad2 } from '../lib/format.js';
 import { statusBadge } from './status.js';
 
 /**
@@ -58,7 +58,7 @@ export function createTooltip(store, { building, plan }) {
     } else if (apt) {
       render(
         inner,
-        h('div', {}, h('p', { className: 'tooltip__title' }, `Apartment ${apt.number}`), h('p', { className: 'tooltip__meta' }, `${formatArea(apt.area)} · Floor ${pad2(apt.floor)}`), statusBadge(apt.status), touch && apt.status !== 'sold' && cta('View apartment', () => store.actions.selectApartment(apt.id))),
+        h('div', {}, h('p', { className: 'tooltip__title' }, `Apartment ${apt.number}`), h('p', { className: 'tooltip__meta' }, `${bedsLabel(apt.layout.bedrooms)} · ${formatArea(apt.area)} · ${formatPriceShort(apt.price)}${apt.estimated ? ' (est.)' : ''}`), statusBadge(apt.status), touch && apt.status !== 'sold' && cta('View apartment', () => store.actions.selectApartment(apt.id))),
       );
     }
     flag(root, 'visible', Boolean(floor || apt));

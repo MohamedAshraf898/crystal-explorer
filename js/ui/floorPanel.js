@@ -1,8 +1,8 @@
 import gsap from 'gsap';
-import { apartmentsByFloor, floorSummary } from '../data/apartments.js';
+import { apartmentsByFloor, floorSummary, hasFilters, matchesFilters } from '../data/apartments.js';
 import { floors } from '../data/project.js';
 import { flag, h, isMobile, render } from '../lib/dom.js';
-import { formatArea, pad2 } from '../lib/format.js';
+import { bedsLabel, formatArea, formatMillions, formatPriceShort, pad2 } from '../lib/format.js';
 import { statusIcon } from './status.js';
 
 /**
@@ -15,6 +15,20 @@ export function createFloorPanel(store) {
   root.inert = true;
   const rows = new Map();
   let visible = false;
+  let matchCell = null;
+  /** Filters on: rows that don't match fade out and the stat shows the match count. */
+  function applyFilters(filters) {
+    const on = hasFilters(filters);
+    const level = store.get().selectedFloor;
+    let n = 0;
+    for (const apt of apartmentsByFloor.get(level) ?? []) {
+      const ok = matchesFilters(apt, filters);
+      if (ok) n++;
+      const row = rows.get(apt.id);
+      if (row) flag(row, 'filtered', on && !ok);
+    }
+    if (matchCell) render(matchCell.el, h('dt', {}, on ? 'Match filters' : 'Available'), h('dd', {}, String(on ? n : matchCell.sum.available)));
+  }
   const clearUi = () => {
     if (store.get().hoverSource === 'ui') actions.hoverApartment(null);
   };
@@ -25,6 +39,8 @@ export function createFloorPanel(store) {
     rows.clear();
     root.setAttribute('aria-label', `${floor.name} apartments`);
     const stat = (k, v) => h('div', {}, h('dt', {}, k), h('dd', {}, v));
+    const matchStat = h('div', {});
+    matchCell = { el: matchStat, sum };
     render(
       root,
       h(
@@ -32,7 +48,7 @@ export function createFloorPanel(store) {
         { className: 'floor-panel__head' },
         h('p', { className: 'eyebrow' }, `Level ${pad2(level)}`),
         h('h2', { className: 'floor-panel__title' }, floor.name),
-        h('dl', { className: 'floor-panel__stats' }, stat('Apartments', String(sum.total)), stat('Available', String(sum.available)), stat('Sizes', `${sum.minArea}–${formatArea(sum.maxArea)}`)),
+        h('dl', { className: 'floor-panel__stats' }, stat('Apartments', String(sum.total)), matchStat, stat('Sizes', `${sum.minArea}–${formatArea(sum.maxArea)}`)),
       ),
       h(
         'ul',
@@ -45,14 +61,14 @@ export function createFloorPanel(store) {
               className: 'unit-row',
               'data-status': apt.status,
               disabled: apt.status === 'sold',
-              'aria-label': `Apartment ${apt.number}, ${apt.area} square metres, ${apt.status}`,
+              'aria-label': `Apartment ${apt.number}, ${bedsLabel(apt.layout.bedrooms)}, ${apt.area} square metres, ${formatPriceShort(apt.price)}${apt.estimated ? ' estimated' : ''}, ${apt.status}`,
               onClick: () => actions.selectApartment(apt.id),
               onMouseEnter: () => actions.hoverApartment(apt.id, 'ui'),
               onMouseLeave: clearUi,
               onFocus: () => actions.hoverApartment(apt.id, 'ui'),
               onBlur: clearUi,
             },
-            h('span', { className: 'unit-row__id' }, `Apt ${pad2(apt.number)}`),
+            h('span', { className: 'unit-row__id' }, `Apt ${pad2(apt.number)}`, h('small', { className: 'unit-row__sub', 'aria-hidden': 'true' }, `${apt.layout.bedrooms} bd · ${apt.price == null ? 'On request' : formatMillions(apt.price)}`)),
             h('span', { className: 'unit-row__area' }, formatArea(apt.area)),
             h('span', { className: 'unit-row__status' }, statusIcon(apt.status)),
           );
@@ -74,7 +90,10 @@ export function createFloorPanel(store) {
   }
 
   store.subscribe((st, p) => {
-    if (st.selectedFloor && st.selectedFloor !== p.selectedFloor) build(st.selectedFloor);
+    if (st.selectedFloor && st.selectedFloor !== p.selectedFloor) {
+      build(st.selectedFloor);
+      applyFilters(st.filters);
+    } else if (st.filters !== p.filters && st.selectedFloor) applyFilters(st.filters);
     if (st.hoveredApartment !== p.hoveredApartment) rows.forEach((r, id) => flag(r, 'hovered', id === st.hoveredApartment));
     if (st.viewMode !== p.viewMode) {
       if (st.viewMode === 'floor' && p.viewMode === 'apartment') {

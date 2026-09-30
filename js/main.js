@@ -4,6 +4,7 @@ import { createDirector } from './director.js';
 import { decodeImage, h, isMobile, preload } from './lib/dom.js';
 import { createStore } from './state.js';
 import { createDetails } from './ui/details.js';
+import { createFilters } from './ui/filters.js';
 import { createFloorNav } from './ui/floorNav.js';
 import { createFloorPanel } from './ui/floorPanel.js';
 import { createFloorTitle } from './ui/floorTitle.js';
@@ -34,14 +35,18 @@ async function main() {
 
   // UI layer
   const ui = h('div', { className: 'ui' });
+  const topBar = createTopBar(store);
+  const filters = createFilters(store);
+  topBar.querySelector('.topbar__end').prepend(filters.button);
   ui.append(
-    createTopBar(store),
+    topBar,
     createBackButton(store),
     createFloorNav(store),
     createViewSwitch(store),
     createTooltip(store, { building, plan }),
     createFloorPanel(store),
     createDetails(store),
+    filters.panel,
     createHint(store),
     createLiveRegion(store),
   );

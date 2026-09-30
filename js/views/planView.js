@@ -1,5 +1,5 @@
 import gsap from 'gsap';
-import { apartmentsByFloor } from '../data/apartments.js';
+import { apartmentsByFloor, hasFilters, matchesFilters } from '../data/apartments.js';
 import { floors } from '../data/project.js';
 import { plans } from '../data/plans.js';
 import { flag, h, isMobile, pointsAttr, s } from '../lib/dom.js';
@@ -87,6 +87,7 @@ export function createPlanView(store) {
       polygons.set(apt.id, poly);
       units.append(poly);
     }
+    applyFilters(store.get().filters);
     svg.setAttribute('aria-label', `Floor plan, ${floor.name}`);
     Object.assign(vb, contentBox(plan));
     applyViewBox();
@@ -118,6 +119,15 @@ export function createPlanView(store) {
     let hh = w / aspect;
     return { x: bx + bw / 2 - w / 2, y: by + bh / 2 - hh / 2, w, h: hh };
   }
+
+  /** Fade apartments that don't match the price / area filters (still clickable). */
+  function applyFilters(filters) {
+    const on = hasFilters(filters);
+    for (const apt of apartmentsByFloor.get(floorLevel) ?? []) flag(polygons.get(apt.id), 'filtered', on && !matchesFilters(apt, filters));
+  }
+  store.subscribe((st, p) => {
+    if (st.filters !== p.filters && floorLevel != null) applyFilters(st.filters);
+  });
 
   function highlight(id) {
     polygons.forEach((poly, key) => flag(poly, 'active', key === id));

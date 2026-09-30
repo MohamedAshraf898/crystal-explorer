@@ -15,7 +15,8 @@ You can't just double-click `index.html`, because browsers block JavaScript modu
 1. **Building:** the real render fills the screen. Each of the 6 residential floors is an invisible band traced on the photo. Hovering (or tapping) a floor darkens everything else through an SVG mask, so the highlight is the real facade. The main photo is the night render (03.jpg); switch to **Day** for the same view in daylight.
 2. **Click a floor:** the camera zooms into that floor on the photo, then the architect's plan for that floor appears.
 3. **Floor plan:** every apartment is outlined on the real drawing. Hover or tap to see the number, size and status. The side list offers the same actions.
-4. **Click an apartment:** the plan zooms into it and the details panel opens. It shows a sharp crop of that apartment's plan, size, floor, status, price, and a request-information form.
+4. **Click an apartment:** the plan zooms into it and the details panel opens. It shows a sharp crop of that apartment's plan, size, bedrooms, bathrooms, guest toilet, terraces, private garden / pool, the full room schedule (every room with its dimensions, read from the architect's plans), status, price, and a request-information form.
+5. **Filter:** the **Filter** button (top bar) opens the apartment finder. Price and area each have their own switch, so you can filter by price only, area only, or both together. Matching apartments are listed (click one to open it), the floor list shows how many match on each floor, and non-matching apartments fade out on the plans.
 5. **Back:** use the back button, `Esc`, the breadcrumb, or a click on empty plan space.
 
 **On phones:** tap once to preview, tap again (or tap the button) to open. The photo and the plan can be swiped sideways, and the details panel becomes a bottom sheet you can drag down to close.
@@ -32,7 +33,11 @@ export const unitOverrides = {
 };
 ```
 
-The key is `'<floor>-<apartment number>'`. Status can be `available`, `reserved` or `sold`. Sold apartments are cross-hatched on the plan and can't be selected. Reserved ones are hatched. Anything not listed shows as **Available · Price on request**.
+The key is `'<floor>-<apartment number>'`. Status can be `available`, `reserved` or `sold`. Sold apartments are cross-hatched on the plan and can't be selected. Reserved ones are hatched. Anything not listed shows as **Available** with an **estimated price**. An override `price` is shown as the real price (no "estimated" label); `price: null` shows "On request".
+
+Estimated prices come from the `pricing` model in the same file: built-up area × `perM2` × a floor factor, plus the private garden, roof terrace and pool. Change `perM2` (default EGP 115,000/m²) or any factor and every estimate updates.
+
+Room counts and dimensions per apartment live in **`js/data/layouts.js`** (generated from the plan labels; fix any value there by hand).
 
 To send inquiries to your CRM or email, replace `submitInquiry()` in `js/lib/api.js` with a real `fetch(...)` call.
 
@@ -66,7 +71,7 @@ js/
   main.js             entry: wires data → state → views → UI
   state.js            central state + every action (selectFloor, selectApartment, back…)
   director.js         all animations / transitions in one place
-  data/               project.js (edit), apartments.js (edit), plans.js (generated geometry)
+  data/               project.js (edit), apartments.js (edit: status, prices), layouts.js (rooms per apartment), plans.js (generated geometry)
   views/              buildingView.js (photo + floor bands), planView.js (plan + apartments)
   ui/                 top bar, floor list, view switch, tooltip, floor panel, details, form
   lib/                small DOM / format / API helpers

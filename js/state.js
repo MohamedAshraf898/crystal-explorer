@@ -18,6 +18,7 @@ export function createStore() {
     hoveredFloor: null,
     hoveredApartment: null,
     hoverSource: null, // 'pointer' | 'touch' | 'ui'
+    filters: { area: null, price: null }, // each [min, max] or null — independent, combinable
     ready: false,
   };
   const listeners = new Set();
@@ -66,6 +67,13 @@ export function createStore() {
     },
     setView(view) {
       if (state.viewMode === 'building') set({ view, hoveredFloor: null, hoverSource: null });
+    },
+    /** Set one filter ('area' | 'price') to [min, max], or null to switch it off. */
+    setFilter(key, range) {
+      set({ filters: { ...state.filters, [key]: range } });
+    },
+    clearFilters() {
+      set({ filters: { area: null, price: null } });
     },
     setReady() {
       set({ ready: true });

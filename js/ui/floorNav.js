@@ -1,4 +1,4 @@
-import { floorSummary } from '../data/apartments.js';
+import { apartmentsByFloor, floorSummary, hasFilters, matchesFilters } from '../data/apartments.js';
 import { floors } from '../data/project.js';
 import { flag, h } from '../lib/dom.js';
 import { pad2 } from '../lib/format.js';
@@ -10,12 +10,15 @@ import { pad2 } from '../lib/format.js';
 export function createFloorNav(store) {
   const { actions } = store;
   const buttons = new Map();
+  const metas = new Map();
   const clearUi = () => {
     if (store.get().hoverSource === 'ui') actions.hoverFloor(null);
   };
   const list = h('ol', { className: 'floor-nav__list' });
+  const title = h('p', { className: 'eyebrow floor-nav__title' }, 'Floors');
   for (const floor of [...floors].reverse()) {
     const sum = floorSummary(floor.level);
+    const meta = h('span', { className: 'floor-nav__meta', 'aria-hidden': 'true' }, `${sum.available}/${sum.total}`);
     const b = h(
       'button',
       {
@@ -30,9 +33,10 @@ export function createFloorNav(store) {
       },
       h('span', { className: 'floor-nav__num' }, pad2(floor.level)),
       h('span', { className: 'floor-nav__tick', 'aria-hidden': 'true' }),
-      h('span', { className: 'floor-nav__meta', 'aria-hidden': 'true' }, `${sum.available}/${sum.total}`),
+      meta,
     );
     buttons.set(floor.level, b);
+    metas.set(floor.level, { meta, sum, name: floor.name });
     list.append(h('li', {}, b));
   }
   list.addEventListener('keydown', (e) => {
@@ -55,7 +59,22 @@ export function createFloorNav(store) {
     list.scrollTo({ left: list.scrollLeft + (b.left - l.left) - (l.width - b.width) / 2, behavior: 'smooth' });
   }
 
+  /** With filters on, each floor shows how many of its apartments match. */
+  function applyFilters(filters) {
+    const on = hasFilters(filters);
+    metas.forEach(({ meta, sum, name }, level) => {
+      const b = buttons.get(level);
+      const n = on ? apartmentsByFloor.get(level).filter((a) => matchesFilters(a, filters)).length : 0;
+      meta.textContent = on ? String(n) : `${sum.available}/${sum.total}`;
+      flag(b, 'matched', on && n > 0);
+      flag(b, 'empty', on && n === 0);
+      b.setAttribute('aria-label', on ? `${name}: ${n} of ${sum.total} apartments match your filters` : `${name}: ${sum.available} of ${sum.total} apartments available`);
+    });
+    title.textContent = on ? 'Matches' : 'Floors';
+  }
+
   store.subscribe((st, p) => {
+    if (st.filters !== p.filters) applyFilters(st.filters);
     if (st.hoveredFloor !== p.hoveredFloor) buttons.forEach((b, l) => flag(b, 'hovered', l === st.hoveredFloor));
     if (st.selectedFloor !== p.selectedFloor) {
       buttons.forEach((b, l) => {
@@ -66,5 +85,5 @@ export function createFloorNav(store) {
       centerChip(buttons.get(st.selectedFloor));
     }
   });
-  return h('nav', { className: 'floor-nav', 'aria-label': 'Floors' }, h('p', { className: 'eyebrow floor-nav__title' }, 'Floors'), list);
+  return h('nav', { className: 'floor-nav', 'aria-label': 'Floors' }, title, list);
 }

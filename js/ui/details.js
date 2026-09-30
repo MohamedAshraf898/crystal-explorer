@@ -1,5 +1,5 @@
 import gsap from 'gsap';
-import { apartmentsById } from '../data/apartments.js';
+import { apartmentsById, pricing } from '../data/apartments.js';
 import { detailImage, floors, project } from '../data/project.js';
 import { h, isMobile, pointsAttr, render, s } from '../lib/dom.js';
 import { formatArea, formatPrice, pad2 } from '../lib/format.js';
@@ -40,6 +40,9 @@ export function createDetails(store) {
     const floor = floors.find((f) => f.level === a.floor);
     const sold = a.status === 'sold';
     const row = (k, v) => h('div', { className: 'spec-list__row' }, h('dt', {}, k), h('dd', {}, v));
+    const L = a.layout;
+    const fact = (value, label) => h('div', { className: 'facts__item' }, h('span', { className: 'facts__value' }, String(value)), h('span', { className: 'facts__label' }, label));
+    const plural = (n, one, many) => (n === 1 ? one : many);
 
     const body =
       tab === 'inquiry'
@@ -50,11 +53,27 @@ export function createDetails(store) {
             h('div', { 'data-reveal': true }, unitFigure(a)),
             h('div', { className: 'details__area', 'data-reveal': true }, h('span', { className: 'details__area-value' }, String(a.area)), h('span', { className: 'details__area-unit' }, 'm²')),
             h(
+              'div',
+              { className: 'facts', 'data-reveal': true },
+              fact(L.bedrooms, plural(L.bedrooms, 'Bedroom', 'Bedrooms')),
+              fact(L.bathrooms, plural(L.bathrooms, 'Bathroom', 'Bathrooms')),
+              L.toilets > 0 && fact(L.toilets, 'Guest toilet'),
+              L.garden > 0 ? fact(`${L.garden} m²`, 'Garden') : L.roofTerrace > 0 ? fact(`${L.roofTerrace} m²`, 'Terrace') : L.terraces > 0 && fact(L.terraces, plural(L.terraces, 'Terrace', 'Terraces')),
+            ),
+            h(
               'dl',
               { className: 'spec-list', 'data-reveal': true },
               row('Apartment', pad2(a.number)),
               row('Floor', floor.name),
               row('Built-up area', formatArea(a.area)),
+              row('Bedrooms', [L.bedrooms, L.masterSuite && '(incl. master)'].filter(Boolean).join(' ')),
+              row('Bathrooms', [L.bathrooms, L.toilets && `+ ${L.toilets} guest toilet`].filter(Boolean).join(' ')),
+              row('Living', [L.reception, L.living && 'living room'].filter(Boolean).join(' + ')),
+              L.dressing && row('Dressing room', 'Yes'),
+              L.terraces > 0 && row(plural(L.terraces, 'Terrace', 'Terraces'), String(L.terraces)),
+              L.roofTerrace > 0 && row('Private terrace', formatArea(L.roofTerrace)),
+              L.garden > 0 && row('Private garden', formatArea(L.garden)),
+              L.pool && row('Private pool', 'Yes'),
               row('Project', `${project.name} ${project.location}`),
               row('Delivery', project.delivery),
             ),
@@ -62,7 +81,16 @@ export function createDetails(store) {
               'div',
               { className: 'details__meta', 'data-reveal': true },
               h('div', {}, h('p', { className: 'eyebrow' }, 'Status'), statusBadge(a.status, 'lg')),
-              h('div', {}, h('p', { className: 'eyebrow' }, 'Price'), h('p', { className: 'details__price', 'data-sold': sold || null }, formatPrice(a.price))),
+              h('div', {}, h('p', { className: 'eyebrow' }, a.estimated ? 'Estimated price' : 'Price'), h('p', { className: 'details__price', 'data-sold': sold || null }, formatPrice(a.price))),
+            ),
+            a.estimated && a.price != null && h('p', { className: 'details__disclaimer', 'data-reveal': true }, `Estimate based on about ${project.currency} ${new Intl.NumberFormat('en-US').format(pricing.perM2)}/m², adjusted for floor, garden and terrace. Contact sales for the official price and payment plans.`),
+            h(
+              'section',
+              { className: 'rooms', 'data-reveal': true },
+              h('p', { className: 'eyebrow' }, 'Room schedule'),
+              h('ul', { className: 'rooms__list' }, ...L.rooms.map(([name, size]) => h('li', {}, h('span', {}, name), h('span', {}, size)))),
+              L.garden > 0 && h('p', { className: 'rooms__note' }, `Private garden ${formatArea(L.garden)}${L.pool ? ' with plunge pool' : ''}`),
+              L.roofTerrace > 0 && h('p', { className: 'rooms__note' }, `Private terrace ${formatArea(L.roofTerrace)}`),
             ),
             tab === 'details' &&
               h(

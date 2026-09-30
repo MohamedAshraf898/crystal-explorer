@@ -1230,6 +1230,477 @@ a {
   vector-effect: non-scaling-stroke;
 }
 
+
+/* ── apartment finder (price / area filters) ─────────────────────────────── */
+
+.filter-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--fg-line);
+  color: var(--fg);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: border-color 0.3s var(--ease), background-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+.filter-btn:hover,
+.filter-btn[data-open] {
+  border-color: var(--fg);
+}
+
+.filter-btn[data-active] {
+  background: var(--sand);
+  border-color: var(--sand);
+  color: var(--teal-900);
+}
+
+.filter-btn__icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.filter-btn__count:empty {
+  display: none;
+}
+
+.filter-btn__count {
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--teal-900);
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.finder {
+  position: absolute;
+  top: calc(var(--topbar) + 4px);
+  right: var(--gutter);
+  width: 400px;
+  max-height: calc(100% - var(--topbar) - 24px);
+  display: flex;
+  flex-direction: column;
+  background: rgba(247, 244, 239, 0.985);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  box-shadow: 0 24px 60px -30px rgba(8, 22, 28, 0.45);
+  visibility: hidden;
+  z-index: 6;
+}
+
+.finder__head {
+  position: relative;
+  padding: 24px 26px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.finder__title {
+  margin: 4px 0 0;
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 24px;
+  line-height: 1.15;
+  outline: none;
+}
+
+.finder__close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.finder__controls {
+  padding: 8px 26px 4px;
+}
+
+.range {
+  margin: 0;
+  padding: 16px 0 14px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+
+.range:last-child {
+  border-bottom: 0;
+}
+
+.range__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 14px;
+}
+
+.range__readout {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  transition: color 0.3s var(--ease);
+}
+
+.range:has(.switch__input:checked) .range__readout {
+  color: var(--ink);
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.switch__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.switch__track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  transition: background-color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+
+.switch__track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ink-3);
+  transition: transform 0.35s var(--ease), background-color 0.3s var(--ease);
+}
+
+.switch__input:checked + .switch__track {
+  background: var(--teal-800);
+  border-color: var(--teal-800);
+}
+
+.switch__input:checked + .switch__track::after {
+  transform: translateX(14px);
+  background: #fff;
+}
+
+.switch__input:focus-visible + .switch__track {
+  outline: 1px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.range__track {
+  position: relative;
+  height: 28px;
+}
+
+.range__track::before,
+.range__fill {
+  content: '';
+  position: absolute;
+  top: 13px;
+  height: 2px;
+}
+
+.range__track::before {
+  left: 0;
+  right: 0;
+  background: var(--line-strong);
+}
+
+.range__fill {
+  background: var(--ink-3);
+  transition: background-color 0.3s var(--ease);
+}
+
+.range:has(.switch__input:checked) .range__fill {
+  background: var(--sand);
+}
+
+.range__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: none;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.range__input::-webkit-slider-runnable-track {
+  height: 28px;
+  background: none;
+}
+
+.range__input::-moz-range-track {
+  background: none;
+}
+
+.range__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid var(--teal-800);
+  box-shadow: 0 2px 6px rgba(8, 22, 28, 0.2);
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.range__input::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid var(--teal-800);
+  box-shadow: 0 2px 6px rgba(8, 22, 28, 0.2);
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.range__input:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--sand);
+  outline-offset: 2px;
+}
+
+.range__ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+
+.finder__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 26px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.finder__summary {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.finder__reset {
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.finder__reset:hover {
+  color: var(--ink);
+}
+
+.finder__results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
+}
+
+.result {
+  display: grid;
+  grid-template-columns: 76px 1fr auto 14px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 26px;
+  text-align: left;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--line);
+  transition: background-color 0.3s var(--ease);
+}
+
+.result:hover:not(:disabled) {
+  background: var(--sand-soft);
+}
+
+.result__id {
+  display: grid;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.result__id small,
+.unit-row__sub {
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-3);
+}
+
+.result__spec {
+  color: var(--ink-2);
+}
+
+.result__price {
+  font-weight: 500;
+}
+
+.result[data-status='available'] .result__status {
+  color: var(--teal);
+}
+
+.result[data-status='reserved'] .result__status {
+  color: #9a7a47;
+}
+
+.result:disabled {
+  color: var(--ink-3);
+}
+
+.finder__empty {
+  padding: 24px 26px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+/* filter effects on the plan, the floor list and the unit list */
+.unit[data-filtered] {
+  fill: rgba(238, 234, 227, 0.78);
+}
+
+.unit[data-filtered][data-active] {
+  fill: rgba(29, 68, 82, 0.1);
+}
+
+.unit-row__id {
+  display: grid;
+}
+
+.unit-row[data-filtered] {
+  opacity: 0.35;
+}
+
+.floor-nav__item[data-matched] .floor-nav__meta {
+  opacity: 1;
+  right: 0;
+  min-width: 20px;
+  padding: 1px 5px;
+  background: var(--sand);
+  color: var(--teal-900);
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0;
+}
+
+.floor-nav__item[data-matched]:not([data-active]) .floor-nav__tick {
+  transform: scaleX(0.333);
+}
+
+.floor-nav__item[data-empty] {
+  opacity: 0.4;
+}
+
+/* apartment facts in the details panel */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  border: 1px solid var(--line);
+}
+
+.facts__item {
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px;
+}
+
+.facts__item + .facts__item {
+  border-left: 1px solid var(--line);
+}
+
+.facts__value {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.facts__label {
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.details__disclaimer {
+  margin: -8px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.rooms .eyebrow {
+  margin-bottom: 8px;
+}
+
+.rooms__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.rooms__list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+}
+
+.rooms__list li span:last-child {
+  color: var(--ink-2);
+}
+
+.rooms__note {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: var(--teal);
+}
+
 /* ── mobile ──────────────────────────────────────────────────────────────── */
 
 @media (max-width: 1100px) {
@@ -1442,6 +1913,67 @@ a {
 
   .floor-panel__hint {
     display: none;
+  }
+
+
+  /* finder → bottom sheet; filter button → icon + count */
+  .filter-btn {
+    height: 38px;
+    padding: 0 12px;
+  }
+
+  .filter-btn__label {
+    display: none;
+  }
+
+  .topbar__end {
+    gap: 14px;
+  }
+
+  .finder {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: 82vh;
+    height: 82dvh;
+    max-height: none;
+    border-width: 1px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 8;
+  }
+
+  .finder__head {
+    padding: 16px 16px 12px;
+  }
+
+  .finder__title {
+    font-size: 21px;
+  }
+
+  .finder__close {
+    top: 10px;
+    right: 10px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .finder__controls,
+  .finder__bar {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .result {
+    grid-template-columns: 64px 1fr auto 14px;
+    gap: 8px;
+    padding: 6px 16px;
+    font-size: 12px;
+  }
+
+  .facts__value {
+    font-size: 21px;
   }
 
   /* details → bottom sheet */
