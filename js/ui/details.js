@@ -3,6 +3,7 @@ import { apartmentsById, pricing } from '../data/apartments.js';
 import { detailImage, floors, project } from '../data/project.js';
 import { h, isMobile, render } from '../lib/dom.js';
 import { COMPARE_MAX } from '../state.js';
+import { createPaymentPlan } from './paymentPlan.js';
 import { unitFigure } from './unitFigure.js';
 import { formatArea, formatPrice, pad2 } from '../lib/format.js';
 import { createInquiryForm } from './inquiry.js';
@@ -70,7 +71,8 @@ export function createDetails(store) {
               h('div', {}, h('p', { className: 'eyebrow' }, 'Status'), statusBadge(a.status, 'lg')),
               h('div', {}, h('p', { className: 'eyebrow' }, a.estimated ? 'Estimated price' : 'Price'), h('p', { className: 'details__price', 'data-sold': sold || null }, formatPrice(a.price))),
             ),
-            a.estimated && a.price != null && h('p', { className: 'details__disclaimer', 'data-reveal': true }, `Estimate based on about ${project.currency} ${new Intl.NumberFormat('en-US').format(pricing.perM2)}/m², adjusted for floor, garden and terrace. Contact sales for the official price and payment plans.`),
+            a.estimated && a.price != null && h('p', { className: 'details__disclaimer', 'data-reveal': true }, `Estimate based on about ${project.currency} ${new Intl.NumberFormat('en-US').format(pricing.perM2)}/m², adjusted for floor, garden and terrace. Contact sales for the official price.`),
+            h('div', { 'data-reveal': true }, createPaymentPlan(a)),
             h(
               'section',
               { className: 'rooms', 'data-reveal': true },

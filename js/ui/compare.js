@@ -4,6 +4,7 @@ import { floors } from '../data/project.js';
 import { flag, h, isMobile, render } from '../lib/dom.js';
 import { formatArea, formatPrice, pad2 } from '../lib/format.js';
 import { COMPARE_MAX } from '../state.js';
+import { paymentSchedule } from '../data/paymentPlans.js';
 import { statusBadge } from './status.js';
 import { unitFigure } from './unitFigure.js';
 
@@ -23,6 +24,8 @@ const perM2 = (a) => (a.price == null ? null : Math.round(a.price / a.area / 100
 const ROWS = [
   { label: 'Price', value: (a) => a.price, show: (a) => formatPrice(a.price) + (a.estimated && a.price != null ? ' *' : ''), best: 'min' },
   { label: 'Price per m²', value: (a) => perM2(a), show: (a) => (a.price == null ? '—' : formatPrice(perM2(a))), best: 'min' },
+  { label: 'Down payment', value: (a) => paymentSchedule(a.price, '10y')?.down, show: (a) => (a.price == null ? '—' : formatPrice(paymentSchedule(a.price, '10y').down)), best: 'min' },
+  { label: 'Monthly, 10-yr plan', value: (a) => paymentSchedule(a.price, '10y')?.monthlyRange[0], show: (a) => (a.price == null ? '—' : `from ${formatPrice(paymentSchedule(a.price, '10y').monthlyRange[0])}`), best: 'min' },
   { label: 'Built-up area', value: (a) => a.area, show: (a) => formatArea(a.area), best: 'max' },
   { label: 'Bedrooms', value: (a) => a.layout.bedrooms, show: (a) => `${a.layout.bedrooms}${a.layout.masterSuite ? ' (incl. master)' : ''}`, best: 'max' },
   { label: 'Bathrooms', value: (a) => a.layout.bathrooms, show: (a) => String(a.layout.bathrooms), best: 'max' },

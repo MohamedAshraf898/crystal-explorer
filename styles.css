@@ -2044,6 +2044,172 @@ a {
   color: var(--ink-3);
 }
 
+
+/* ── payment plan (details panel) ───────────────────────────────────────── */
+
+.pay {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.pay .eyebrow {
+  margin: 0;
+}
+
+.pay__tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--teal-800);
+}
+
+.pay__tab {
+  height: 38px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+.pay__tab + .pay__tab {
+  border-left: 1px solid var(--teal-800);
+}
+
+.pay__tab[aria-checked='true'] {
+  background: var(--teal-800);
+  color: var(--paper-2);
+}
+
+.pay__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin: 0;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.pay__stat {
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.pay__stat dt {
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.pay__stat dd {
+  display: grid;
+  gap: 2px;
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pay__stat small {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--ink-3);
+}
+
+.pay__years {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.pay__years th,
+.pay__years td {
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-weight: 400;
+}
+
+.pay__years thead th {
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.pay__years td:last-child,
+.pay__years th:last-child {
+  text-align: right;
+  width: 38%;
+}
+
+.pay__years tfoot th,
+.pay__years tfoot td {
+  font-weight: 600;
+  border-bottom: 0;
+}
+
+.pay__bar {
+  display: inline-block;
+  width: calc(var(--w) * 0.6);
+  height: 6px;
+  margin-right: 8px;
+  background: var(--sand);
+  vertical-align: middle;
+}
+
+.pay__toggle {
+  justify-self: start;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pay__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+}
+
+.pay__list li {
+  display: grid;
+  grid-template-columns: 30px 80px 1fr auto;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.pay__list li[data-kind='down'],
+.pay__list li[data-kind='yearly'] {
+  font-weight: 600;
+  background: var(--sand-soft);
+}
+
+.pay__n,
+.pay__kind {
+  color: var(--ink-3);
+}
+
+.pay__amount {
+  text-align: right;
+}
+
+.pay__note {
+  margin: 0;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
 /* ── mobile ──────────────────────────────────────────────────────────────── */
 
 @media (max-width: 1100px) {
