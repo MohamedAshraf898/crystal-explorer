@@ -146,10 +146,7 @@ export function createFilters(store) {
                   className: 'result',
                   'data-status': a.status,
                   disabled: a.status === 'sold',
-                  onClick: () => {
-                    actions.selectApartment(a.id);
-                    if (isMobile.matches) setOpen(false);
-                  },
+                  onClick: () => actions.selectApartment(a.id),
                 },
                 h('span', { className: 'result__id' }, `Apt ${pad2(a.number)}`, h('small', {}, `Floor ${pad2(a.floor)}`)),
                 h('span', { className: 'result__spec' }, `${bedsLabel(a.layout.bedrooms)} · ${formatArea(a.area)}`),
@@ -187,6 +184,8 @@ export function createFilters(store) {
   }
 
   store.subscribe((st, p) => {
+    // Opening an apartment (from the list, the plan or anywhere) closes the finder.
+    if (st.selectedApartment && st.selectedApartment !== p.selectedApartment) setOpen(false);
     if (st.filters !== p.filters) {
       update(st.filters);
       controls.forEach((c, i) => {
