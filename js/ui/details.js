@@ -72,7 +72,6 @@ export function createDetails(store) {
               h('div', {}, h('p', { className: 'eyebrow' }, a.estimated ? 'Estimated price' : 'Price'), h('p', { className: 'details__price', 'data-sold': sold || null }, formatPrice(a.price))),
             ),
             a.estimated && a.price != null && h('p', { className: 'details__disclaimer', 'data-reveal': true }, `Estimate based on about ${project.currency} ${new Intl.NumberFormat('en-US').format(pricing.perM2)}/m², adjusted for floor, garden and terrace. Contact sales for the official price.`),
-            h('div', { 'data-reveal': true }, createPaymentPlan(a)),
             h(
               'section',
               { className: 'rooms', 'data-reveal': true },
@@ -81,6 +80,7 @@ export function createDetails(store) {
               L.garden > 0 && h('p', { className: 'rooms__note' }, `Private garden ${formatArea(L.garden)}${L.pool ? ' with plunge pool' : ''}`),
               L.roofTerrace > 0 && h('p', { className: 'rooms__note' }, `Private terrace ${formatArea(L.roofTerrace)}`),
             ),
+            h('div', { 'data-reveal': true }, createPaymentPlan(a)),
             tab === 'details' &&
               h(
                 'div',
