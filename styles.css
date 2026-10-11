@@ -2210,6 +2210,75 @@ a {
   color: var(--ink-3);
 }
 
+
+/* ── area map behind the floor plans ────────────────────────────────────── */
+
+.map-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.map-bg__layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+.map-bg__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+/* soft paper wash so the plan stays the hero; stronger towards the edges */
+.map-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 70% at 45% 50%, rgba(238, 234, 227, 0) 40%, rgba(238, 234, 227, 0.55) 100%);
+}
+
+.map-bg__label {
+  position: absolute;
+  transform: translate(-50%, -50%) rotate(var(--r));
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(74, 91, 97, 0.75);
+}
+
+.map-bg__label--sea {
+  font-size: 15px;
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 0.32em;
+  color: rgba(29, 68, 82, 0.55);
+}
+
+.map-bg__label--road {
+  font-size: 9px;
+  color: rgba(74, 91, 97, 0.6);
+}
+
+.map-bg__credit {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 9.5px;
+  color: var(--ink-3);
+  z-index: 1;
+}
+
 /* ── mobile ──────────────────────────────────────────────────────────────── */
 
 @media (max-width: 1100px) {
@@ -2576,6 +2645,23 @@ a {
 
   .details__compare {
     padding: 12px;
+  }
+
+
+  .map-bg__credit {
+    left: auto;
+    right: 8px;
+    bottom: auto;
+    top: calc(44dvh - 20px);
+    transform: none;
+  }
+
+  .map-bg__label {
+    font-size: 8.5px;
+  }
+
+  .map-bg__label--sea {
+    font-size: 12px;
   }
 
   /* details → bottom sheet */

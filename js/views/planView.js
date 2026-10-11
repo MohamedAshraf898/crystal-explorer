@@ -165,6 +165,8 @@ export function createPlanView(store) {
     viewBox: vb,
     applyViewBox,
     contentBox: () => contentBox(plans[planId]),
+    /** Width / height of the current plan drawing (for lining up the area map). */
+    contentAspect: () => (planId ? plans[planId].content[2] / plans[planId].content[3] : 0),
     unitBox,
     polygonRect(id) {
       return polygons.get(id)?.getBoundingClientRect() ?? null;

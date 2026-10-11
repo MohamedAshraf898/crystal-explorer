@@ -20,6 +20,30 @@ export const project = {
 };
 
 /**
+ * Area map behind the floor plans. Drawn locally from OpenStreetMap data
+ * (tools/render-map.py) — no Google, no live map service. `site` is where the
+ * building is on the image (percent); labels are placed in percent too.
+ * Location: Azur One Eleven Hotel Alamein, 30.86971, 28.88078.
+ */
+export const areaMap = {
+  image: 'assets/map/area.webp',
+  imageSmall: 'assets/map/area-sm.webp',
+  width: 3200,
+  height: 2497,
+  site: [49.804, 49.732],
+  // share of the map width the floor plan should cover (sets the map's zoom)
+  planShare: 0.42,
+  labels: [
+    { text: 'Mediterranean Sea', x: 80, y: 16, kind: 'sea' },
+    { text: 'International Coastal Road', x: 34, y: 26.2, rotate: 32.5, kind: 'road' },
+    { text: 'Azur Beach Club', x: 75.9, y: 41.5, kind: 'place' },
+    { text: 'Vista Marina', x: 56.3, y: 64, kind: 'place' },
+    { text: 'Porto Golf Marina', x: 88.7, y: 81.5, kind: 'place' },
+  ],
+  credit: '© OpenStreetMap contributors',
+};
+
+/**
  * Building photographs. Each view has one polygon per residential floor
  * (floor 1 → 6), traced on the image in image pixels. The polygons follow the
  * slab lines, including where the facade steps back.

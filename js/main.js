@@ -14,6 +14,7 @@ import { createTooltip } from './ui/tooltip.js';
 import { createTopBar } from './ui/topbar.js';
 import { createViewSwitch } from './ui/viewSwitch.js';
 import { createBuildingView } from './views/buildingView.js';
+import { createMapBackground } from './views/mapBackground.js';
 import { createPlanView } from './views/planView.js';
 
 /**
@@ -32,7 +33,8 @@ async function main() {
   const building = createBuildingView(store);
   const plan = createPlanView(store);
   const floorTitle = createFloorTitle();
-  app.append(building.element, plan.element, floorTitle.element);
+  const areaMap = createMapBackground(store, plan);
+  app.append(areaMap.element, building.element, plan.element, floorTitle.element);
 
   // UI layer
   const ui = h('div', { className: 'ui' });
