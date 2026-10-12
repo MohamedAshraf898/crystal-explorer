@@ -2,13 +2,14 @@
 # Map data (c) OpenStreetMap contributors, ODbL. Then convert to area.webp / area-sm.webp.
 import json, math
 from PIL import Image, ImageDraw, ImageFilter
-S, N, W, E = 30.807, 30.932, 28.798, 28.962  # ~15.7 x 13.9 km around the site
+S, N, W, E = 30.770, 30.950, 28.780, 29.040  # ~25 x 20 km: Crystal to New Alamein / the Promenade
 SITE = (30.8697081, 28.8807809)
 import sys
 OUT_W = int(sys.argv[1]) if len(sys.argv) > 1 else 3200
 SS = 2  # supersample
 MINI_W = 3.2  # minimap roads are drawn bolder so they read when the map is small
-K = OUT_W / 3200 * 10.70 / 15.68  # line widths tuned for 3200 px over 10.7 km; keep them per km
+MAP_KM = (E - W) * 111.32 * math.cos(math.radians((S + N) / 2))
+K = (OUT_W / MAP_KM) / (3200 / 10.70)  # line widths tuned for 3200 px over 10.7 km; keep them per km
 def merc(lat, lon):
     x = (lon + 180) / 360
     y = (1 - math.log(math.tan(math.radians(lat)) + 1 / math.cos(math.radians(lat))) / math.pi) / 2

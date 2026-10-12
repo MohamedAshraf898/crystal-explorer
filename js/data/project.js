@@ -31,16 +31,19 @@ export const project = {
  */
 export const minimap = {
   image: 'assets/map/minimap.webp',
-  width: 2400,
-  height: 2131,
-  bounds: { south: 30.807, north: 30.932, west: 28.798, east: 28.962 },
+  // full map (Map & directions): tiles assets/map/tiles/{row}-{col}.webp
+  full: { width: 12680, height: 10226, cols: 6, rows: 5 },
+  width: 3800,
+  height: 3065,
+  // ~25 x 20 km: from Crystal past New Alamein, so every route fits
+  bounds: { south: 30.77, north: 30.95, west: 28.78, east: 29.04 },
   // Crystal Alamein by Darak group — https://maps.app.goo.gl/osGFTBUkyUVzaKHc7
   site: { name: 'Crystal Alamein', lat: 30.8667078, lng: 28.8839683 },
   // turn the map clockwise (degrees): coast straight down, sea on the right
   rotate: 49.7,
   // radius of the circle in km, per zoom step (+ / −); `start` is the index
-  radiusKm: [1.5, 3, 4.5, 6.8],
-  start: 3,
+  radiusKm: [1.5, 3, 4.5, 7, 10],
+  start: 4,
   places: [
     { name: 'Azur One Eleven Hotel', kind: 'hotel', lat: 30.8697081, lng: 28.8807809 },
     { name: 'North Square Mall', kind: 'mall', lat: 30.8644332, lng: 28.9321163 },

@@ -11,7 +11,8 @@ import { formatDistance, formatDuration, loadRoads, route } from '../lib/router.
  * OpenStreetMap road data — nothing is sent to Google or any map service.
  */
 
-const MAP_W = 8000, MAP_H = 7104, COLS = 4, ROWS = 4; // assets/map/tiles/{row}-{col}.webp
+const { width: MAP_W, height: MAP_H, cols: COLS, rows: ROWS } = cfg.full; // assets/map/tiles/{row}-{col}.webp
+const TW = Math.ceil(MAP_W / COLS), TH = Math.ceil(MAP_H / ROWS); // tile size (last row / column is cropped)
 const ICONS = {
   mall: '<path d="M7 9V7a5 5 0 0 1 10 0v2"/><path d="M5 9h14l-1 11H6z"/>',
   promenade: '<path d="M3 15c2 0 2-2 4.5-2S10 15 12 15s2.5-2 4.5-2 2.5 2 4.5 2"/><path d="M3 19c2 0 2-2 4.5-2S10 19 12 19s2.5-2 4.5-2 2.5 2 4.5 2"/><path d="M12 11V4l5 3-5 3"/>',
@@ -58,7 +59,7 @@ export function createMapView() {
   const tiles = [];
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
-      tiles.push(h('img', { className: 'mapview__tile', alt: '', draggable: 'false', decoding: 'async', 'data-src': `assets/map/tiles/${r}-${c}.webp`, style: `left:${(c * MAP_W) / COLS}px;top:${(r * MAP_H) / ROWS}px;width:${MAP_W / COLS}px;height:${MAP_H / ROWS}px` }));
+      tiles.push(h('img', { className: 'mapview__tile', alt: '', draggable: 'false', decoding: 'async', 'data-src': `assets/map/tiles/${r}-${c}.webp`, style: `left:${c * TW}px;top:${r * TH}px;width:${Math.min(TW, MAP_W - c * TW)}px;height:${Math.min(TH, MAP_H - r * TH)}px` }));
   const routeCasing = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
   const routeLine = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
   const routeLinks = document.createElementNS('http://www.w3.org/2000/svg', 'path'); // dashed bits from a place to its road

@@ -1,8 +1,8 @@
 # Builds assets/map/roads.json: a compact drivable road graph for in-browser routing.
 # Map data (c) OpenStreetMap contributors, ODbL.
 import json, math, sys, collections
-S, N, W, E = 30.807, 30.932, 28.798, 28.962
-IMG_W, IMG_H = 8000, 7104  # coordinates are stored in pixels of this map size
+S, N, W, E = 30.770, 30.950, 28.780, 29.040
+IMG_W, IMG_H = int(sys.argv[3]), int(sys.argv[4])  # pixels of the full map image
 def merc(lat, lon):
     x = (lon + 180) / 360
     y = (1 - math.log(math.tan(math.radians(lat)) + 1 / math.cos(math.radians(lat))) / math.pi) / 2
