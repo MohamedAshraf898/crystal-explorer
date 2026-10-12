@@ -2236,6 +2236,43 @@ a {
   user-select: none;
 }
 
+/* map zoom buttons (floor / apartment pages) */
+.map-zoom {
+  position: absolute;
+  right: calc(var(--stage-right) + 16px);
+  bottom: 40px;
+  display: grid;
+  border: 1px solid var(--line-strong);
+  background: rgba(247, 244, 239, 0.95);
+  visibility: hidden;
+}
+
+.app[data-mode='apartment'] .map-zoom {
+  right: 492px;
+}
+
+.map-zoom__btn {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--ink);
+  transition: background-color 0.3s var(--ease), opacity 0.3s;
+}
+
+.map-zoom__btn + .map-zoom__btn {
+  border-top: 1px solid var(--line);
+}
+
+.map-zoom__btn:hover:not(:disabled) {
+  background: var(--sand-soft);
+}
+
+.map-zoom__btn:disabled {
+  opacity: 0.3;
+}
+
 /* soft paper wash so the plan stays the hero; stronger towards the edges */
 .map-bg::after {
   content: '';
@@ -2662,6 +2699,22 @@ a {
 
   .map-bg__label--sea {
     font-size: 12px;
+  }
+
+
+  .map-zoom {
+    right: 8px;
+    bottom: auto;
+    top: calc(44dvh - 112px);
+  }
+
+  .app[data-mode='apartment'] .map-zoom {
+    display: none;
+  }
+
+  .map-zoom__btn {
+    width: 38px;
+    height: 38px;
   }
 
   /* details → bottom sheet */

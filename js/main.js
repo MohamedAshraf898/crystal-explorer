@@ -54,6 +54,7 @@ async function main() {
     compare.tray,
     compare.view,
     createHint(store),
+    areaMap.controls,
     createLiveRegion(store),
   );
   app.append(ui);

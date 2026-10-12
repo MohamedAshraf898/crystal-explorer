@@ -2,10 +2,12 @@
 # Map data (c) OpenStreetMap contributors, ODbL. Then convert to area.webp / area-sm.webp.
 import json, math
 from PIL import Image, ImageDraw, ImageFilter
-S, N, W, E = 30.832, 30.907, 28.825, 28.937
+S, N, W, E = 30.807, 30.932, 28.798, 28.962  # ~15.7 x 13.9 km around the site
 SITE = (30.8697081, 28.8807809)
-OUT_W = 3200
+import sys
+OUT_W = int(sys.argv[1]) if len(sys.argv) > 1 else 3200
 SS = 2  # supersample
+K = OUT_W / 3200 * 10.70 / 15.68  # line widths tuned for 3200 px over 10.7 km; keep them per km
 def merc(lat, lon):
     x = (lon + 180) / 360
     y = (1 - math.log(math.tan(math.radians(lat)) + 1 / math.cos(math.radians(lat))) / math.pi) / 2
@@ -16,7 +18,7 @@ w, h = OUT_W * SS, OUT_H * SS
 def px(lat, lon):
     x, y = merc(lat, lon)
     return ((x - x0) / (x1 - x0) * w, (y - y0) / (y1 - y0) * h)
-d = json.load(open('data.json'))['elements']
+d = json.load(open(sys.argv[2] if len(sys.argv) > 2 else 'data.json'))['elements']
 C = {
   'land': (238, 234, 227), 'sea': (205, 218, 217), 'water': (196, 212, 212), 'sand': (232, 223, 204),
   'green': (221, 226, 210), 'pool': (190, 210, 212), 'building': (226, 221, 211), 'bline': (212, 205, 193),
@@ -55,7 +57,7 @@ area_fill(lambda t: t.get('landuse') in ('grass', 'orchard', 'farmland', 'cemete
 area_fill(lambda t: t.get('landuse') == 'construction', C['constr'])
 area_fill(lambda t: t.get('natural') == 'water' or t.get('waterway'), C['water'])
 area_fill(lambda t: t.get('leisure') in ('swimming_pool', 'water_park'), C['pool'])
-area_fill(lambda t: 'building' in t, C['building'], C['bline'], SS)
+area_fill(lambda t: 'building' in t, C['building'], C['bline'], max(1, round(SS * K)))
 # roads, drawn minor -> major with casings
 widths = {'motorway': 9, 'trunk': 9, 'primary': 8, 'secondary': 7, 'tertiary': 5.5, 'trunk_link': 5, 'secondary_link': 4.5, 'tertiary_link': 4,
           'residential': 3.4, 'unclassified': 3.4, 'service': 2.2, 'construction': 2.2, 'pedestrian': 2.4, 'track': 1.6}
@@ -65,7 +67,7 @@ def roads(kinds, color, casing=False, extra=0):
         if hw not in kinds: continue
         p = pts(e)
         if len(p) < 2: continue
-        wd = (widths.get(hw, 1.2) + extra) * SS
+        wd = (widths.get(hw, 1.2) + extra) * SS * K
         dr.line(p, fill=color, width=max(1, round(wd)), joint='curve')
 foot = {'footway', 'path', 'steps', 'cycleway', 'corridor'}
 roads(foot, C['foot'])

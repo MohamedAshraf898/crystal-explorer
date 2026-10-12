@@ -21,24 +21,30 @@ export const project = {
 
 /**
  * Area map behind the floor plans. Drawn locally from OpenStreetMap data
- * (tools/render-map.py) — no Google, no live map service. `site` is where the
- * building is on the image (percent); labels are placed in percent too.
- * Location: Azur One Eleven Hotel Alamein, 30.86971, 28.88078.
+ * (tools/render-map.py) — no Google, no live map service. Positions are real
+ * coordinates: `bounds` are the edges of the image (Web Mercator), `site` is
+ * the building (Azur One Eleven Hotel Alamein).
  */
 export const areaMap = {
   image: 'assets/map/area.webp',
   imageSmall: 'assets/map/area-sm.webp',
-  width: 3200,
-  height: 2497,
-  site: [49.804, 49.732],
-  // share of the map width the floor plan should cover (sets the map's zoom)
-  planShare: 0.42,
+  width: 8000,
+  height: 7104,
+  bounds: { south: 30.807, north: 30.932, west: 28.798, east: 28.962 },
+  site: { lat: 30.8697081, lng: 28.8807809 },
+  // turn the map clockwise (degrees) around the building: the coast runs
+  // straight down with the sea on the right
+  rotate: 49.7,
+  // at zoom 1 the floor plan spans this many km of map (zoom 1 = the first
+  // view; you can't zoom out further than that)
+  planKm: 4.5,
+  zoom: { start: 1.7, min: 1, max: 4, step: 1.4 },
   labels: [
-    { text: 'Mediterranean Sea', x: 80, y: 16, kind: 'sea' },
-    { text: 'International Coastal Road', x: 34, y: 26.2, rotate: 32.5, kind: 'road' },
-    { text: 'Azur Beach Club', x: 75.9, y: 41.5, kind: 'place' },
-    { text: 'Vista Marina', x: 56.3, y: 64, kind: 'place' },
-    { text: 'Porto Golf Marina', x: 88.7, y: 81.5, kind: 'place' },
+    { text: 'Mediterranean Sea', lat: 30.885, lng: 28.932, kind: 'sea', upright: true },
+    { text: 'International Coastal Road', lat: 30.88736, lng: 28.86308, rotate: 32.5, kind: 'road' },
+    { text: 'Azur Beach Club', lat: 30.87588, lng: 28.91001, kind: 'place', upright: true },
+    { text: 'Vista Marina', lat: 30.85901, lng: 28.88806, kind: 'place', upright: true },
+    { text: 'Porto Golf Marina', lat: 30.84588, lng: 28.92434, kind: 'place', upright: true },
   ],
   credit: '© OpenStreetMap contributors',
 };
