@@ -26,7 +26,8 @@ export const project = {
  *   bounds: edges of the map image (Web Mercator)
  *   site:   the building, always in the centre
  *   places: highlighted locations (they stick to the rim when off the map)
- *   kind:   icon — 'mall' | 'promenade' | 'university' | 'pin'
+ *   kind:   icon — 'mall' | 'promenade' | 'university' | 'hotel' | 'pin'
+ *   grow:   size follows the zoom (small when zoomed out, big when zoomed in)
  */
 export const minimap = {
   image: 'assets/map/minimap.webp',
@@ -40,6 +41,8 @@ export const minimap = {
   radiusKm: [1.5, 3, 4.5, 6.8],
   start: 3,
   places: [
+    // grows with zoom: hidden behind the centre arrow when zoomed out
+    { name: 'Azur One Eleven Hotel', kind: 'hotel', lat: 30.8697081, lng: 28.8807809, grow: true },
     { name: 'North Square Mall', kind: 'mall', lat: 30.8644332, lng: 28.9321163 },
     { name: 'Alamein Promenade', kind: 'promenade', lat: 30.8599958, lng: 28.9456745 },
     { name: 'AAST El-Alamein', kind: 'university', lat: 30.82835, lng: 28.8802122 },

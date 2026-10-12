@@ -2339,6 +2339,31 @@ a {
   height: 12px;
 }
 
+/* a place that grows with the zoom, behind the centre arrow */
+.minimap__blip--grow,
+.minimap__blip--grow:hover,
+.minimap__blip--grow:focus-visible,
+.minimap__blip--grow[data-open] {
+  z-index: 0;
+  align-items: start;
+  padding-top: 6%;
+  background: rgba(196, 167, 122, 0.9);
+  box-shadow: 0 0 0 2px var(--teal-900), 0 0 0 6px rgba(196, 167, 122, 0.25);
+  transition: none;
+}
+
+.minimap__blip--grow .minimap__blip-icon {
+  width: 30%;
+  height: 30%;
+  min-width: 0;
+  opacity: var(--icon, 0);
+}
+
+.minimap__me {
+  z-index: 1;
+  pointer-events: none; /* taps go through to the Azur point underneath */
+}
+
 .minimap__caption {
   display: grid;
   justify-items: center;

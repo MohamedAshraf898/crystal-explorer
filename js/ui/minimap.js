@@ -13,6 +13,7 @@ const ICONS = {
   mall: '<path d="M7 9V7a5 5 0 0 1 10 0v2"/><path d="M5 9h14l-1 11H6z"/>',
   promenade: '<path d="M3 15c2 0 2-2 4.5-2S10 15 12 15s2.5-2 4.5-2 2.5 2 4.5 2"/><path d="M3 19c2 0 2-2 4.5-2S10 19 12 19s2.5-2 4.5-2 2.5 2 4.5 2"/><path d="M12 11V4l5 3-5 3"/>',
   university: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/>',
+  hotel: '<path d="M3 20V6h11v14"/><path d="M14 10h7v10"/><path d="M6 9h2M10 9h1M6 13h2M10 13h1M6 17h2M10 17h1M17 14h1M17 17h1"/><path d="M2 20h20"/>',
   pin: '<path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
 };
 const svgIcon = (body, cls) => {
@@ -57,13 +58,14 @@ export function createMinimap(store) {
   // blips (buttons, so they can be focused / tapped to show their name)
   const blips = cfg.places.map((p) => {
     const km = distanceKm(cfg.site, p);
-    const b = { place: p, km, pos: project(p) };
+    const where = km < 0.05 ? `${cfg.site.name} is here` : `${km.toFixed(1)} km away`;
+    const b = { place: p, km, where, pos: project(p) };
     b.el = h(
       'button',
       {
         type: 'button',
-        className: `minimap__blip minimap__blip--${p.kind}`,
-        'aria-label': `${p.name}, ${km.toFixed(1)} km away`,
+        className: `minimap__blip minimap__blip--${p.kind}${p.grow ? ' minimap__blip--grow' : ''}`,
+        'aria-label': `${p.name}, ${where}`,
         onClick: () => select(selected === b ? null : b),
         onMouseEnter: () => show(b),
         onMouseLeave: () => show(selected),
@@ -84,10 +86,10 @@ export function createMinimap(store) {
     blips.forEach((x) => flag(x.el, 'open', x === b));
     if (b) {
       capName.textContent = b.place.name;
-      capMeta.textContent = `${b.km.toFixed(1)} km away`;
+      capMeta.textContent = b.where;
     } else {
       capName.textContent = cfg.site.name;
-      capMeta.textContent = `${cfg.places.length} places nearby`;
+      capMeta.textContent = `${cfg.places.filter((p) => !p.grow).length} places nearby`;
     }
   }
   function select(b) {
@@ -122,7 +124,16 @@ export function createMinimap(store) {
     const [nx, ny] = turn(0, -1);
     north.style.transform = `translate(${(R + nx * (R + 1)).toFixed(1)}px, ${(R + ny * (R + 1)).toFixed(1)}px) translate(-50%, -50%)`;
     const max = R - 14;
-    const pts = blips.map((b) => {
+    // "grow" places scale with the zoom (diameter in px ∝ 1 / radius)
+    const grow = blips.filter((b) => b.place.grow);
+    for (const b of grow) {
+      const size = Math.min(R * 0.7, (R * 0.7 * cfg.radiusKm[0]) / state.radius);
+      b.el.style.width = b.el.style.height = `${size.toFixed(1)}px`;
+      b.el.style.setProperty('--icon', `${Math.max(0, Math.min(1, (size - 34) / 18))}`);
+      const [x, y] = turn((b.pos[0] - sx) * cfg.width * s, (b.pos[1] - sy) * cfg.height * s);
+      b.el.style.transform = `translate(${(R + x).toFixed(1)}px, ${(R + y).toFixed(1)}px) translate(-50%, -50%)`;
+    }
+    const pts = blips.filter((b) => !b.place.grow).map((b) => {
       let [x, y] = turn((b.pos[0] - sx) * cfg.width * s, (b.pos[1] - sy) * cfg.height * s);
       const d = Math.hypot(x, y);
       const edge = d > max;
