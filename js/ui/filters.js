@@ -1,12 +1,12 @@
 import gsap from 'gsap';
-import { apartments, hasFilters, matchesFilters, ranges } from '../data/apartments.js';
+import { apartments, bedroomOptions, hasFilters, matchesFilters, ranges } from '../data/apartments.js';
 import { flag, h, isMobile, render } from '../lib/dom.js';
 import { bedsLabel, formatArea, formatMillions, formatPriceShort, pad2 } from '../lib/format.js';
 import { COMPARE_MAX } from '../state.js';
 import { statusIcon } from './status.js';
 
 /**
- * Apartment finder — price and area filters.
+ * Apartment finder — price, area and bedroom filters.
  * Each filter has its own switch, so they work alone or together:
  * price only, area only, or both. Moving a slider switches its filter on.
  * The result list opens any apartment; the plan and floor list dim
@@ -35,6 +35,7 @@ export function createFilters(store) {
   const summary = h('p', { className: 'finder__summary', 'aria-live': 'polite' });
   const results = h('ul', { className: 'finder__results', 'aria-label': 'Matching apartments' });
   const controls = FILTERS.map((f) => rangeControl(f));
+  const bedsControl = createBedsControl();
 
   const panel = h(
     'aside',
@@ -43,10 +44,10 @@ export function createFilters(store) {
       'header',
       { className: 'finder__head' },
       h('p', { className: 'eyebrow' }, 'Apartment finder'),
-      h('h2', { id: 'finder-title', className: 'finder__title', tabindex: -1 }, 'Filter by price & area'),
+      h('h2', { id: 'finder-title', className: 'finder__title', tabindex: -1 }, 'Find your apartment'),
       h('button', { type: 'button', className: 'icon-btn finder__close', 'aria-label': 'Close filters', onClick: () => setOpen(false) }, closeIcon()),
     ),
-    h('div', { className: 'finder__controls' }, ...controls.map((c) => c.element)),
+    h('div', { className: 'finder__controls' }, bedsControl.element, ...controls.map((c) => c.element)),
     h('div', { className: 'finder__bar' }, summary, h('button', { type: 'button', className: 'finder__reset', onClick: reset }, 'Reset')),
     results,
   );
@@ -119,6 +120,36 @@ export function createFilters(store) {
     return { element, sync, reset: () => ((values[f.key] = [lo, hi]), sync(null)) };
   }
 
+  /* ── bedrooms: tap one or more counts; none selected = any ───────────── */
+  function createBedsControl() {
+    const chips = bedroomOptions.map((n) =>
+      h(
+        'button',
+        { type: 'button', className: 'beds__chip', 'aria-pressed': 'false', 'data-n': n, onClick: () => toggle(n) },
+        String(n),
+        h('span', { className: 'sr-only' }, n === 1 ? ' bedroom' : ' bedrooms'),
+      ),
+    );
+    const any = h('button', { type: 'button', className: 'beds__chip beds__chip--any', 'aria-pressed': 'true', onClick: () => actions.setFilter('beds', null) }, 'Any');
+    const readout = h('span', { className: 'range__readout' }, 'Any');
+    function toggle(n) {
+      const cur = store.get().filters.beds ?? [];
+      const next = cur.includes(n) ? cur.filter((x) => x !== n) : [...cur, n].sort((a, b) => a - b);
+      actions.setFilter('beds', next.length ? next : null);
+    }
+    function sync(beds) {
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(Boolean(beds?.includes(Number(c.dataset.n))))));
+      any.setAttribute('aria-pressed', String(!beds));
+      readout.textContent = beds ? `${beds.join(', ')} bedroom${beds.length === 1 && beds[0] === 1 ? '' : 's'}` : 'Any';
+    }
+    const element = h(
+      'fieldset',
+      { className: 'range beds', 'data-key': 'beds', 'data-on': null },
+      h('legend', { className: 'range__head' }, h('span', { className: 'beds__label' }, 'Bedrooms'), readout),
+      h('div', { className: 'beds__chips', role: 'group', 'aria-label': 'Number of bedrooms' }, any, ...chips),
+    );
+    return { element, sync };
+  }
   function reset() {
     controls.forEach((c) => c.reset());
     actions.clearFilters();
@@ -129,10 +160,10 @@ export function createFilters(store) {
     const active = hasFilters(filters);
     compareButtons.clear();
     const list = apartments.filter((a) => matchesFilters(a, filters)).sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity) || a.area - b.area);
-    const n = [filters.price, filters.area].filter(Boolean).length;
+    const n = [filters.price, filters.area, filters.beds].filter(Boolean).length;
     count.textContent = n ? String(n) : '';
     flag(button, 'active', active);
-    button.setAttribute('aria-label', active ? `Filter apartments, ${n} filter${n > 1 ? 's' : ''} on, ${list.length} matching` : 'Filter apartments by price and area');
+    button.setAttribute('aria-label', active ? `Filter apartments, ${n} filter${n > 1 ? 's' : ''} on, ${list.length} matching` : 'Filter apartments by price, area and bedrooms');
     summary.textContent = active ? `${list.length} of ${apartments.length} apartments match` : `All ${apartments.length} apartments`;
     render(
       results,
@@ -210,6 +241,7 @@ export function createFilters(store) {
     if (st.compare !== p.compare) compareButtons.forEach((b, id) => syncCompareButton(id, b, st.compare));
     if (st.filters !== p.filters) {
       update(st.filters);
+      if (st.filters.beds !== p.filters.beds) bedsControl.sync(st.filters.beds);
       controls.forEach((c, i) => {
         const key = FILTERS[i].key;
         if (st.filters[key] !== p.filters[key]) c.sync(st.filters[key]);

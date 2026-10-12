@@ -20,7 +20,7 @@ export function createStore() {
     hoveredFloor: null,
     hoveredApartment: null,
     hoverSource: null, // 'pointer' | 'touch' | 'ui'
-    filters: { area: null, price: null }, // each [min, max] or null — independent, combinable
+    filters: { area: null, price: null, beds: null }, // area/price [min, max], beds [n, …]; null = off — independent, combinable
     compare: [], // apartment ids picked for side-by-side comparison (max COMPARE_MAX)
     compareOpen: false,
     ready: false,
@@ -73,7 +73,7 @@ export function createStore() {
     setView(view) {
       if (state.viewMode === 'building') set({ view, hoveredFloor: null, hoverSource: null });
     },
-    /** Set one filter ('area' | 'price') to [min, max], or null to switch it off. */
+    /** Set one filter: 'area' | 'price' to [min, max], 'beds' to a list of counts; null switches it off. */
     setFilter(key, range) {
       set({ filters: { ...state.filters, [key]: range } });
     },
@@ -95,7 +95,7 @@ export function createStore() {
       set({ compareOpen: false });
     },
     clearFilters() {
-      set({ filters: { area: null, price: null } });
+      set({ filters: { area: null, price: null, beds: null } });
     },
     setReady() {
       set({ ready: true });

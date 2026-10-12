@@ -96,13 +96,18 @@ export const ranges = {
 
 /**
  * Does an apartment pass the filters? Each filter is independent:
- * `filters.area` / `filters.price` are [min, max] or null (= not filtering).
+ * `filters.area` / `filters.price` are [min, max] or null (= not filtering);
+ * `filters.beds` is a list of bedroom counts (any of them matches) or null.
  */
 export function matchesFilters(apt, filters) {
-  const { area, price } = filters ?? {};
+  const { area, price, beds } = filters ?? {};
+  if (beds && !beds.includes(apt.layout.bedrooms)) return false;
   if (area && (apt.area < area[0] || apt.area > area[1])) return false;
   if (price && (apt.price == null || apt.price < price[0] || apt.price > price[1])) return false;
   return true;
 }
 
-export const hasFilters = (filters) => Boolean(filters?.area || filters?.price);
+export const hasFilters = (filters) => Boolean(filters?.area || filters?.price || filters?.beds);
+
+/** Bedroom counts that exist in the building, e.g. [1, 2, 3]. */
+export const bedroomOptions = [...new Set(apartments.map((a) => a.layout.bedrooms))].sort((a, b) => a - b);
