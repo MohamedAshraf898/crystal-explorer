@@ -9,12 +9,12 @@ import { createFilters } from './ui/filters.js';
 import { createFloorNav } from './ui/floorNav.js';
 import { createFloorPanel } from './ui/floorPanel.js';
 import { createFloorTitle } from './ui/floorTitle.js';
+import { createMinimap } from './ui/minimap.js';
 import { createBackButton, createHint, createLiveRegion, createLoader } from './ui/misc.js';
 import { createTooltip } from './ui/tooltip.js';
 import { createTopBar } from './ui/topbar.js';
 import { createViewSwitch } from './ui/viewSwitch.js';
 import { createBuildingView } from './views/buildingView.js';
-import { createMapBackground } from './views/mapBackground.js';
 import { createPlanView } from './views/planView.js';
 
 /**
@@ -33,8 +33,7 @@ async function main() {
   const building = createBuildingView(store);
   const plan = createPlanView(store);
   const floorTitle = createFloorTitle();
-  const areaMap = createMapBackground(store, plan);
-  app.append(areaMap.element, building.element, plan.element, floorTitle.element);
+  app.append(building.element, plan.element, floorTitle.element);
 
   // UI layer
   const ui = h('div', { className: 'ui' });
@@ -54,7 +53,7 @@ async function main() {
     compare.tray,
     compare.view,
     createHint(store),
-    areaMap.controls,
+    createMinimap(store),
     createLiveRegion(store),
   );
   app.append(ui);

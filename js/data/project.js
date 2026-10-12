@@ -20,31 +20,29 @@ export const project = {
 };
 
 /**
- * Area map behind the floor plans. Drawn locally from OpenStreetMap data
- * (tools/render-map.py) — no Google, no live map service. Positions are real
- * coordinates: `bounds` are the edges of the image (Web Mercator), `site` is
- * the building (Azur One Eleven Hotel Alamein).
+ * MINIMAP — the round, GTA-style map at the bottom of the floor page.
+ * Drawn locally from OpenStreetMap data (tools/render-map.py): no Google,
+ * no live map service. Everything is in real coordinates.
+ *   bounds: edges of the map image (Web Mercator)
+ *   site:   the building, always in the centre
+ *   places: highlighted locations (they stick to the rim when off the map)
+ *   kind:   icon — 'mall' | 'promenade' | 'university' | 'pin'
  */
-export const areaMap = {
-  image: 'assets/map/area.webp',
-  imageSmall: 'assets/map/area-sm.webp',
-  width: 8000,
-  height: 7104,
+export const minimap = {
+  image: 'assets/map/minimap.webp',
+  width: 2400,
+  height: 2131,
   bounds: { south: 30.807, north: 30.932, west: 28.798, east: 28.962 },
-  site: { lat: 30.8697081, lng: 28.8807809 },
-  // turn the map clockwise (degrees) around the building: the coast runs
-  // straight down with the sea on the right
+  site: { name: 'Crystal Alamein', lat: 30.8697081, lng: 28.8807809 },
+  // turn the map clockwise (degrees): coast straight down, sea on the right
   rotate: 49.7,
-  // at zoom 1 the floor plan spans this many km of map (zoom 1 = the first
-  // view; you can't zoom out further than that)
-  planKm: 4.5,
-  zoom: { start: 1.7, min: 1, max: 4, step: 1.4 },
-  labels: [
-    { text: 'Mediterranean Sea', lat: 30.885, lng: 28.932, kind: 'sea', upright: true },
-    { text: 'International Coastal Road', lat: 30.88736, lng: 28.86308, rotate: 32.5, kind: 'road' },
-    { text: 'Azur Beach Club', lat: 30.87588, lng: 28.91001, kind: 'place', upright: true },
-    { text: 'Vista Marina', lat: 30.85901, lng: 28.88806, kind: 'place', upright: true },
-    { text: 'Porto Golf Marina', lat: 30.84588, lng: 28.92434, kind: 'place', upright: true },
+  // radius of the circle in km, per zoom step (+ / −); `start` is the index
+  radiusKm: [1.5, 3, 4.5, 6.8],
+  start: 3,
+  places: [
+    { name: 'North Square Mall', kind: 'mall', lat: 30.8644332, lng: 28.9321163 },
+    { name: 'Alamein Promenade', kind: 'promenade', lat: 30.8599958, lng: 28.9456745 },
+    { name: 'AAST El-Alamein', kind: 'university', lat: 30.82835, lng: 28.8802122 },
   ],
   credit: '© OpenStreetMap contributors',
 };

@@ -2211,109 +2211,193 @@ a {
 }
 
 
-/* ── area map behind the floor plans ────────────────────────────────────── */
 
-.map-bg {
+/* ── minimap (GTA-style, bottom left of the floor page) ─────────────────── */
+
+.minimap {
+  --size: 208px;
   position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
+  left: var(--gutter);
+  bottom: 30px;
+  width: var(--size);
+  display: grid;
+  justify-items: center;
+  gap: 8px;
   visibility: hidden;
+  z-index: 2;
 }
 
-.map-bg__layer {
+.minimap__ring {
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+}
+
+.minimap__disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #18323a;
+  border: 3px solid var(--teal-800);
+  box-shadow: 0 0 0 1px var(--sand), 0 14px 34px -14px rgba(8, 22, 28, 0.55);
+  /* Safari: keep the rounded clip on the transformed child */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+
+.minimap__layer {
   position: absolute;
   top: 0;
   left: 0;
   will-change: transform;
 }
 
-.map-bg__img {
+.minimap__img {
   display: block;
   width: 100%;
   height: 100%;
   user-select: none;
 }
 
-/* map zoom buttons (floor / apartment pages) */
-.map-zoom {
+/* the building: always in the middle, like the player arrow */
+.minimap__me {
   position: absolute;
-  right: calc(var(--stage-right) + 16px);
-  bottom: 40px;
+  left: 50%;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  transform: translate(-50%, -50%);
   display: grid;
-  border: 1px solid var(--line-strong);
-  background: rgba(247, 244, 239, 0.95);
-  visibility: hidden;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--teal-900), 0 0 0 9px rgba(255, 255, 255, 0.16);
 }
 
-.app[data-mode='apartment'] .map-zoom {
-  right: 492px;
+.minimap__me-icon {
+  width: 13px;
+  height: 13px;
+  fill: var(--teal-800);
 }
 
-.map-zoom__btn {
-  width: 40px;
-  height: 40px;
-  font-size: 20px;
-  font-weight: 300;
-  line-height: 1;
+.minimap__north {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--teal-900);
+  box-shadow: 0 0 0 2px var(--teal-800);
+  font-size: 9.5px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.minimap__blip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--sand);
+  box-shadow: 0 0 0 2px var(--teal-900), 0 4px 10px rgba(0, 0, 0, 0.4);
+  transition: box-shadow 0.25s var(--ease);
+}
+
+.minimap__blip:hover,
+.minimap__blip:focus-visible,
+.minimap__blip[data-open] {
+  z-index: 2;
+  box-shadow: 0 0 0 2px var(--teal-900), 0 0 0 5px rgba(196, 167, 122, 0.55), 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* off the map: smaller, on the rim */
+.minimap__blip[data-edge] {
+  width: 22px;
+  height: 22px;
+}
+
+.minimap__blip-icon {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: var(--teal-900);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.minimap__blip[data-edge] .minimap__blip-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.minimap__caption {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  margin: 2px 0 0;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.minimap__caption strong {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   color: var(--ink);
-  transition: background-color 0.3s var(--ease), opacity 0.3s;
 }
 
-.map-zoom__btn + .map-zoom__btn {
-  border-top: 1px solid var(--line);
+.minimap__caption small {
+  font-size: 10.5px;
+  color: var(--ink-2);
 }
 
-.map-zoom__btn:hover:not(:disabled) {
-  background: var(--sand-soft);
+.minimap__bar {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  background: rgba(247, 244, 239, 0.96);
 }
 
-.map-zoom__btn:disabled {
+.minimap__zoom {
+  width: 30px;
+  height: 28px;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.minimap__zoom:disabled {
   opacity: 0.3;
 }
 
-/* soft paper wash so the plan stays the hero; stronger towards the edges */
-.map-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 70% 70% at 45% 50%, rgba(238, 234, 227, 0) 40%, rgba(238, 234, 227, 0.55) 100%);
-}
-
-.map-bg__label {
-  position: absolute;
-  transform: translate(-50%, -50%) rotate(var(--r));
-  white-space: nowrap;
-  font-size: 10px;
+.minimap__scale {
+  min-width: 48px;
+  padding: 0 6px;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  text-align: center;
+  font-size: 10.5px;
   font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(74, 91, 97, 0.75);
+  letter-spacing: 0.08em;
 }
 
-.map-bg__label--sea {
-  font-size: 15px;
-  font-weight: 300;
-  font-style: italic;
-  letter-spacing: 0.32em;
-  color: rgba(29, 68, 82, 0.55);
-}
-
-.map-bg__label--road {
-  font-size: 9px;
-  color: rgba(74, 91, 97, 0.6);
-}
-
-.map-bg__credit {
-  position: absolute;
-  left: 50%;
-  bottom: 8px;
-  transform: translateX(-50%);
+.minimap__credit {
   margin: 0;
-  font-size: 9.5px;
+  font-size: 9px;
   color: var(--ink-3);
-  z-index: 1;
+}
+
+/* the big floor number moves right of the minimap */
+.floor-title {
+  left: calc(var(--gutter) + 208px + 32px);
 }
 
 /* ── mobile ──────────────────────────────────────────────────────────────── */
@@ -2685,36 +2769,77 @@ a {
   }
 
 
-  .map-bg__credit {
-    left: auto;
-    right: 8px;
+
+
+
+
+  .minimap {
+    --size: 118px;
+    left: 10px;
     bottom: auto;
-    top: calc(44dvh - 20px);
-    transform: none;
+    top: calc(44dvh - 118px - 74px);
+    gap: 4px;
   }
 
-  .map-bg__label {
-    font-size: 8.5px;
-  }
-
-  .map-bg__label--sea {
-    font-size: 12px;
-  }
-
-
-  .map-zoom {
-    right: 8px;
-    bottom: auto;
-    top: calc(44dvh - 112px);
-  }
-
-  .app[data-mode='apartment'] .map-zoom {
+  .app[data-mode='apartment'] .minimap {
     display: none;
   }
 
-  .map-zoom__btn {
-    width: 38px;
-    height: 38px;
+  .minimap__me {
+    width: 20px;
+    height: 20px;
+  }
+
+  .minimap__blip {
+    width: 22px;
+    height: 22px;
+  }
+
+  .minimap__blip[data-edge] {
+    width: 18px;
+    height: 18px;
+  }
+
+  .minimap__blip-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .minimap__north {
+    width: 16px;
+    height: 16px;
+    font-size: 8px;
+  }
+
+  .minimap__zoom {
+    width: 26px;
+    height: 24px;
+  }
+
+  .minimap__scale {
+    min-width: 40px;
+    font-size: 9.5px;
+  }
+
+  .minimap__credit {
+    font-size: 7.5px;
+    white-space: nowrap;
+    padding: 1px 4px;
+    background: rgba(247, 244, 239, 0.9);
+  }
+
+  .minimap__caption {
+    padding: 3px 8px;
+    background: rgba(247, 244, 239, 0.95);
+    border: 1px solid var(--line);
+  }
+
+  .minimap__caption strong {
+    font-size: 10px;
+  }
+
+  .minimap__caption small {
+    font-size: 9px;
   }
 
   /* details → bottom sheet */

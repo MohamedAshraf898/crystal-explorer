@@ -7,6 +7,7 @@ SITE = (30.8697081, 28.8807809)
 import sys
 OUT_W = int(sys.argv[1]) if len(sys.argv) > 1 else 3200
 SS = 2  # supersample
+MINI_W = 3.2  # minimap roads are drawn bolder so they read when the map is small
 K = OUT_W / 3200 * 10.70 / 15.68  # line widths tuned for 3200 px over 10.7 km; keep them per km
 def merc(lat, lon):
     x = (lon + 180) / 360
@@ -19,11 +20,18 @@ def px(lat, lon):
     x, y = merc(lat, lon)
     return ((x - x0) / (x1 - x0) * w, (y - y0) / (y1 - y0) * h)
 d = json.load(open(sys.argv[2] if len(sys.argv) > 2 else 'data.json'))['elements']
+MINI = len(sys.argv) > 3 and sys.argv[3] == 'mini'
 C = {
   'land': (238, 234, 227), 'sea': (205, 218, 217), 'water': (196, 212, 212), 'sand': (232, 223, 204),
   'green': (221, 226, 210), 'pool': (190, 210, 212), 'building': (226, 221, 211), 'bline': (212, 205, 193),
   'casing': (214, 206, 192), 'major': (255, 255, 255), 'minor': (250, 248, 244), 'foot': (226, 220, 210), 'constr': (230, 225, 216),
 }
+if MINI:  # dark, high-contrast minimap (GTA-like)
+    C.update({
+      'land': (24, 50, 58), 'sea': (12, 33, 41), 'water': (16, 44, 54), 'sand': (42, 66, 70),
+      'green': (34, 70, 62), 'pool': (40, 92, 104), 'building': (38, 66, 74), 'bline': (46, 76, 84),
+      'casing': (24, 50, 58), 'major': (196, 167, 122), 'minor': (98, 128, 134), 'foot': (40, 66, 72), 'constr': (30, 58, 66),
+    })
 img = Image.new('RGB', (w, h), C['land'])
 dr = ImageDraw.Draw(img)
 def pts(e): return [px(p['lat'], p['lon']) for p in e.get('geometry', []) if p]
@@ -67,10 +75,10 @@ def roads(kinds, color, casing=False, extra=0):
         if hw not in kinds: continue
         p = pts(e)
         if len(p) < 2: continue
-        wd = (widths.get(hw, 1.2) + extra) * SS * K
+        wd = (widths.get(hw, 1.2) + extra) * SS * K * (MINI_W if MINI else 1)
         dr.line(p, fill=color, width=max(1, round(wd)), joint='curve')
 foot = {'footway', 'path', 'steps', 'cycleway', 'corridor'}
-roads(foot, C['foot'])
+if not MINI: roads(foot, C['foot'])
 minor = {'residential', 'unclassified', 'service', 'construction', 'pedestrian', 'track'}
 major = {'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'trunk_link', 'secondary_link', 'tertiary_link'}
 roads(minor, C['casing'], extra=1.6); roads(minor, C['minor'])
