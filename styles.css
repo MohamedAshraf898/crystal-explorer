@@ -3452,11 +3452,25 @@ a {
   }
 
 
+  /* phones: no round map, just the button (the full map shows the credit) */
+  .minimap {
+    top: calc(44dvh - 50px);
+    width: auto;
+  }
+
+  .minimap__ring,
+  .minimap__caption,
+  .minimap__bar,
+  .minimap__credit {
+    display: none;
+  }
+
   .minimap__open {
-    height: 26px;
-    padding: 0 8px;
-    font-size: 8px;
-    gap: 5px;
+    height: 36px;
+    padding: 0 14px;
+    font-size: 9.5px;
+    gap: 8px;
+    box-shadow: 0 8px 20px -10px rgba(8, 22, 28, 0.5);
   }
 
   /* map view: map on top, directions as a bottom sheet */
