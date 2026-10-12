@@ -293,17 +293,17 @@ export function createMapView() {
     // next door (same compound): a short walk, not a drive
     const mPerPx = ((cfg.bounds.east - cfg.bounds.west) * 111320 * Math.cos((cfg.site.lat * Math.PI) / 180)) / MAP_W;
     const straightM = Math.hypot(a.xy[0] - b.xy[0], a.xy[1] - b.xy[1]) * mPerPx;
-    if (straightM < 400) {
+    if (straightM < 700) {
       state.result = { points: [a.xy, b.xy], walk: true, from: a, to: b };
       drawRoute();
       const walkMin = Math.max(1, Math.round((straightM * 1.3) / 80)); // ~4.8 km/h, paths aren't straight
       render(
         summary,
         h('p', { className: 'mapview__time' }, `${walkMin} min walk`),
-        h('p', { className: 'mapview__dist' }, `Next door · about ${formatDistance(straightM)}`),
+        h('p', { className: 'mapview__dist' }, `Close by · about ${formatDistance(straightM)}`),
         h('p', { className: 'mapview__via' }, `${a.name} → ${b.name}`),
       );
-      render(steps, h('li', { className: 'mapview__step', 'data-turn': 'arrive' }, svg(turnIcon('arrive'), 'mapview__step-icon'), h('span', { className: 'mapview__step-text' }, `${b.name} is right next to ${a.name}, in the same area.`), h('span', { className: 'mapview__step-dist' }, formatDistance(straightM))));
+      render(steps, h('li', { className: 'mapview__step', 'data-turn': 'arrive' }, svg(turnIcon('arrive'), 'mapview__step-icon'), h('span', { className: 'mapview__step-text' }, `${b.name} is a short walk from ${a.name}.`), h('span', { className: 'mapview__step-dist' }, formatDistance(straightM))));
       fit(true);
       return;
     }

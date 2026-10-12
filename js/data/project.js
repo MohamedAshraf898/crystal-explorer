@@ -34,8 +34,8 @@ export const minimap = {
   width: 2400,
   height: 2131,
   bounds: { south: 30.807, north: 30.932, west: 28.798, east: 28.962 },
-  // Crystal sits next to Azur One Eleven Hotel, in the same compound
-  site: { name: 'Crystal Alamein', lat: 30.8684749, lng: 28.8795625 },
+  // Crystal Alamein by Darak group — https://maps.app.goo.gl/osGFTBUkyUVzaKHc7
+  site: { name: 'Crystal Alamein', lat: 30.8667078, lng: 28.8839683 },
   // turn the map clockwise (degrees): coast straight down, sea on the right
   rotate: 49.7,
   // radius of the circle in km, per zoom step (+ / −); `start` is the index
