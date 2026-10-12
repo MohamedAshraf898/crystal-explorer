@@ -53,7 +53,7 @@ export function createMinimap(store) {
   const disc = h('div', { className: 'minimap__disc' }, layer);
   const north = h('span', { className: 'minimap__north', 'aria-hidden': 'true' }, 'N');
   const scale = h('span', { className: 'minimap__scale', 'aria-hidden': 'true' });
-  const center = h('span', { className: 'minimap__me', title: cfg.site.name }, svgIcon('<path d="M12 2l8 20-8-5-8 5z"/>', 'minimap__me-icon'), h('span', { className: 'sr-only' }, cfg.site.name));
+  const center = h('span', { className: 'minimap__me', title: cfg.site.name }, h('span', { className: 'sr-only' }, cfg.site.name));
 
   // blips (buttons, so they can be focused / tapped to show their name)
   const blips = cfg.places.map((p) => {

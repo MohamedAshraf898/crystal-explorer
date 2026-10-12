@@ -2281,25 +2281,38 @@ a {
   user-select: none;
 }
 
-/* the building: always in the middle, like the player arrow */
+/* the building: a dot that always stays in the middle */
 .minimap__me {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 26px;
-  height: 26px;
+  width: 16px;
+  height: 16px;
   transform: translate(-50%, -50%);
-  display: grid;
-  place-items: center;
   border-radius: 50%;
   background: var(--teal-800);
-  box-shadow: 0 0 0 3px #fff, 0 0 0 9px rgba(29, 68, 82, 0.16);
+  box-shadow: 0 0 0 3px #fff, 0 2px 6px 3px rgba(8, 22, 28, 0.25);
 }
 
-.minimap__me-icon {
-  width: 13px;
-  height: 13px;
-  fill: #fff;
+/* soft pulse around the dot */
+.minimap__me::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid var(--teal-800);
+  animation: minimap-pulse 2.4s ease-out infinite;
+}
+
+@keyframes minimap-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
 }
 
 .minimap__north {
@@ -2865,8 +2878,8 @@ a {
   }
 
   .minimap__me {
-    width: 20px;
-    height: 20px;
+    width: 12px;
+    height: 12px;
   }
 
   .minimap__blip {
