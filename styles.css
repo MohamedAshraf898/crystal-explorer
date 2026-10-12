@@ -2215,16 +2215,38 @@ a {
 /* ── minimap (GTA-style, bottom left of the floor page) ─────────────────── */
 
 .minimap {
-  --size: 208px;
+  --size: 172px;
+  --card: 204px; /* height of the card; the floor panel above leaves room for it */
   position: absolute;
-  left: var(--gutter);
-  bottom: 30px;
-  width: var(--size);
+  right: var(--gutter);
+  bottom: 24px;
+  width: 360px;
+  height: var(--card);
+  padding: 16px 18px;
   display: grid;
-  justify-items: center;
-  gap: 8px;
+  grid-template-columns: var(--size) 1fr;
+  grid-template-rows: 1fr auto auto;
+  column-gap: 18px;
+  row-gap: 8px;
+  align-items: center;
+  background: rgba(247, 244, 239, 0.985);
+  border: 1px solid var(--line);
   visibility: hidden;
   z-index: 2;
+}
+
+.minimap__ring {
+  grid-row: 1 / -1;
+}
+
+/* the details panel takes the right side when an apartment is open */
+.app[data-mode='apartment'] .minimap {
+  display: none;
+}
+
+/* floor panel stops above the minimap card */
+.floor-panel {
+  max-height: calc(100% - var(--topbar) - 4px - 24px - 204px - 12px);
 }
 
 .minimap__ring {
@@ -2366,11 +2388,12 @@ a {
 
 .minimap__caption {
   display: grid;
-  justify-items: center;
-  gap: 1px;
-  margin: 2px 0 0;
-  text-align: center;
-  line-height: 1.2;
+  justify-items: start;
+  gap: 2px;
+  margin: 0;
+  text-align: left;
+  line-height: 1.25;
+  align-self: end;
 }
 
 .minimap__caption strong {
@@ -2386,6 +2409,7 @@ a {
 }
 
 .minimap__bar {
+  justify-self: start;
   display: flex;
   align-items: center;
   border: 1px solid var(--line-strong);
@@ -2415,15 +2439,12 @@ a {
 }
 
 .minimap__credit {
+  justify-self: start;
   margin: 0;
   font-size: 9px;
   color: var(--ink-3);
 }
 
-/* the big floor number moves right of the minimap */
-.floor-title {
-  left: calc(var(--gutter) + 208px + 32px);
-}
 
 /* ── mobile ──────────────────────────────────────────────────────────────── */
 
@@ -2438,6 +2459,11 @@ a {
 
   .floor-panel {
     width: 330px;
+  }
+
+  .minimap {
+    width: 330px;
+    --size: 160px;
   }
 
   .dev-logo {
@@ -2801,9 +2827,37 @@ a {
   .minimap {
     --size: 118px;
     left: 10px;
+    right: auto;
     bottom: auto;
     top: calc(44dvh - 118px - 74px);
+    width: var(--size);
+    height: auto;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    justify-items: center;
     gap: 4px;
+    background: none;
+    border: 0;
+  }
+
+  .minimap__ring {
+    grid-row: auto;
+  }
+
+  .minimap__caption {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .minimap__bar,
+  .minimap__credit {
+    justify-self: center;
+  }
+
+  .floor-panel {
+    max-height: none;
   }
 
   .app[data-mode='apartment'] .minimap {
