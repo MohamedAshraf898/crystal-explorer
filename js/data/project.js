@@ -34,15 +34,15 @@ export const minimap = {
   width: 2400,
   height: 2131,
   bounds: { south: 30.807, north: 30.932, west: 28.798, east: 28.962 },
-  site: { name: 'Crystal Alamein', lat: 30.8697081, lng: 28.8807809 },
+  // Crystal sits next to Azur One Eleven Hotel, in the same compound
+  site: { name: 'Crystal Alamein', lat: 30.8684749, lng: 28.8795625 },
   // turn the map clockwise (degrees): coast straight down, sea on the right
   rotate: 49.7,
   // radius of the circle in km, per zoom step (+ / −); `start` is the index
   radiusKm: [1.5, 3, 4.5, 6.8],
   start: 3,
   places: [
-    // grows with zoom: hidden behind the centre arrow when zoomed out
-    { name: 'Azur One Eleven Hotel', kind: 'hotel', lat: 30.8697081, lng: 28.8807809, grow: true },
+    { name: 'Azur One Eleven Hotel', kind: 'hotel', lat: 30.8697081, lng: 28.8807809 },
     { name: 'North Square Mall', kind: 'mall', lat: 30.8644332, lng: 28.9321163 },
     { name: 'Alamein Promenade', kind: 'promenade', lat: 30.8599958, lng: 28.9456745 },
     { name: 'AAST El-Alamein', kind: 'university', lat: 30.82835, lng: 28.8802122 },

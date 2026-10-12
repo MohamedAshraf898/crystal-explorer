@@ -159,6 +159,12 @@ export function createMinimap(store, { onOpen } = {}) {
         c.x += dx * push; c.y += dy * push;
       }
       for (const p of pts) {
+        // never cover the building dot in the middle
+        const c = Math.hypot(p.x, p.y), minC = gap * 0.85;
+        if (c < minC) {
+          const k = c > 0.01 ? minC / c : 1;
+          [p.x, p.y] = c > 0.01 ? [p.x * k, p.y * k] : [minC, 0];
+        }
         const d = Math.hypot(p.x, p.y);
         if (d > max) [p.x, p.y] = [(p.x / d) * max, (p.y / d) * max];
       }

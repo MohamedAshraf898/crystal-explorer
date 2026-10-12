@@ -2616,6 +2616,12 @@ a {
   stroke-linecap: round;
 }
 
+/* short walk between neighbours: a bolder dashed line */
+.mapview__routes[data-walk] .mapview__route-link {
+  stroke-width: calc(4 * var(--k, 1));
+  stroke-dasharray: calc(1 * var(--k, 1)) calc(8 * var(--k, 1));
+}
+
 .mapview__markers {
   position: absolute;
   inset: 0;
