@@ -46,7 +46,9 @@ function toMap({ lat, lng }) {
 export function createMapView() {
   const rot = (cfg.rotate * Math.PI) / 180;
   const cos = Math.cos(rot), sin = Math.sin(rot);
-  const site = { id: 'site', name: cfg.site.name, kind: 'site', xy: toMap(cfg.site) };
+  // places at the project itself (Azur One Eleven Hotel) are shown as part of the site point
+  const here = cfg.places.find((p) => p.grow);
+  const site = { id: 'site', name: here ? `${cfg.site.name} · ${here.name}` : cfg.site.name, kind: 'site', xy: toMap(cfg.site) };
   const places = cfg.places.filter((p) => !p.grow).map((p, i) => ({ id: `p${i}`, name: p.name, kind: p.kind, xy: toMap(p) }));
   const byId = new Map([site, ...places].map((p) => [p.id, p]));
   const view = { x: site.xy[0], y: site.xy[1], s: 0.3 }; // map point at the centre of the visible area, scale
@@ -106,6 +108,7 @@ export function createMapView() {
   const quick = h(
     'div',
     { className: 'mapview__quick', role: 'group', 'aria-label': 'Nearby places' },
+    here && h('button', { type: 'button', className: 'mapview__chip', 'data-id': 'site', onClick: () => goToSite() }, svg(ICONS.hotel, 'mapview__chip-icon'), here.name),
     ...places.map((p) => h('button', { type: 'button', className: 'mapview__chip', 'data-id': p.id, onClick: () => setEnd('to', p.id) }, svg(ICONS[p.kind] ?? ICONS.pin, 'mapview__chip-icon'), p.name)),
   );
   const close = h('button', { type: 'button', className: 'icon-btn mapview__close', 'aria-label': 'Close map', onClick: () => setOpen(false) }, svg('<path d="M5 5l14 14M19 5L5 19"/>', 'mapview__close-icon'));
@@ -324,6 +327,12 @@ export function createMapView() {
     if (which === 'from' && id === 'me') return locate();
     state[which] = id;
     if (state.from === state.to) state[which === 'to' ? 'from' : 'to'] = id === 'site' ? (places[0]?.id ?? 'site') : 'site';
+    update();
+  }
+  /** directions to the project (Azur): from wherever the start is, or from the first place */
+  function goToSite() {
+    if (state.from === 'site') state.from = state.me ? 'me' : places[0]?.id;
+    state.to = 'site';
     update();
   }
   function swapEnds() {
