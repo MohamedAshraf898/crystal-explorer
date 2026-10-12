@@ -2259,7 +2259,7 @@ a {
 
 .minimap {
   --size: 172px;
-  --card: 204px; /* height of the card; the floor panel above leaves room for it */
+  --card: 216px; /* height of the card; the floor panel above leaves room for it */
   position: absolute;
   right: var(--gutter);
   bottom: 24px;
@@ -2268,7 +2268,7 @@ a {
   padding: 16px 18px;
   display: grid;
   grid-template-columns: var(--size) 1fr;
-  grid-template-rows: 1fr auto auto;
+  grid-template-rows: 1fr auto auto auto;
   column-gap: 18px;
   row-gap: 8px;
   align-items: center;
@@ -2289,7 +2289,7 @@ a {
 
 /* floor panel stops above the minimap card */
 .floor-panel {
-  max-height: calc(100% - var(--topbar) - 4px - 24px - 204px - 12px);
+  max-height: calc(100% - var(--topbar) - 4px - 24px - 216px - 12px);
 }
 
 .minimap__ring {
@@ -2501,6 +2501,474 @@ a {
   color: var(--ink-3);
 }
 
+
+
+/* ── minimap → full map ─────────────────────────────────────────────────── */
+
+.minimap__open-area {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  cursor: zoom-in;
+}
+
+.minimap__open {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  background: var(--teal-800);
+  color: var(--paper-2);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: background-color 0.3s var(--ease);
+}
+
+.minimap__open:hover {
+  background: var(--teal);
+}
+
+.minimap__open-icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+/* ── map view (full screen, inside the site) ────────────────────────────── */
+
+.mapview {
+  position: absolute;
+  inset: 0;
+  z-index: 14;
+  background: #f0ece5;
+  color: var(--ink);
+  visibility: hidden;
+  overflow: hidden;
+}
+
+.mapview__stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+}
+
+.mapview__stage[data-dragging] {
+  cursor: grabbing;
+}
+
+.mapview__world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.mapview__tile {
+  position: absolute;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.mapview__routes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* widths are in screen px: --k converts them to map pixels (set from JS) */
+.mapview__route,
+.mapview__route-casing {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mapview__route-casing {
+  stroke: #fff;
+  stroke-width: calc(11 * var(--k, 1));
+}
+
+.mapview__route {
+  stroke: var(--teal);
+  stroke-width: calc(6 * var(--k, 1));
+}
+
+.mapview__route-link {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: calc(2.5 * var(--k, 1));
+  stroke-dasharray: calc(2 * var(--k, 1)) calc(6 * var(--k, 1));
+  stroke-linecap: round;
+}
+
+.mapview__markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mapview__marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  pointer-events: auto;
+  /* anchored at the point: icon above, tag below */
+  margin: -17px 0 0 0;
+  translate: -50% 0;
+}
+
+.mapview__pin {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--sand);
+  box-shadow: 0 0 0 3px #fff, 0 4px 12px rgba(8, 22, 28, 0.3);
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+
+.mapview__marker:hover .mapview__pin,
+.mapview__marker[data-active] .mapview__pin {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 3px #fff, 0 0 0 7px rgba(196, 167, 122, 0.45), 0 4px 12px rgba(8, 22, 28, 0.3);
+}
+
+.mapview__pin-icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--teal-900);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mapview__tag {
+  padding: 3px 8px;
+  white-space: nowrap;
+  background: rgba(13, 34, 41, 0.92);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.mapview__marker--site {
+  margin-top: -11px;
+}
+
+.mapview__dot {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--teal-800);
+  box-shadow: 0 0 0 4px #fff, 0 3px 10px 4px rgba(8, 22, 28, 0.25);
+}
+
+.mapview__dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--teal-800);
+  animation: minimap-pulse 2.4s ease-out infinite;
+}
+
+.mapview__marker--site .mapview__tag {
+  background: var(--teal-800);
+}
+
+.mapview__marker--me {
+  margin-top: -9px;
+}
+
+.mapview__me {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2a7de1;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 10px rgba(42, 125, 225, 0.2);
+}
+
+.mapview__controls {
+  position: absolute;
+  right: 20px;
+  bottom: 24px;
+  display: grid;
+  border: 1px solid var(--line-strong);
+  background: rgba(247, 244, 239, 0.97);
+  box-shadow: 0 10px 24px -12px rgba(8, 22, 28, 0.4);
+}
+
+.mapview__ctl {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.mapview__ctl + .mapview__ctl {
+  border-top: 1px solid var(--line);
+}
+
+.mapview__ctl:disabled {
+  opacity: 0.3;
+}
+
+.mapview__ctl-icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.mapview__panel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  bottom: 16px;
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(247, 244, 239, 0.985);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px -30px rgba(8, 22, 28, 0.45);
+}
+
+.mapview__head,
+.mapview__ends,
+.mapview__quick,
+.mapview__summary,
+.mapview__note {
+  flex: none; /* only the steps list shrinks / scrolls */
+}
+
+.mapview__head {
+  position: relative;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mapview__title {
+  margin: 4px 0 0;
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1.1;
+  outline: none;
+}
+
+.mapview__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+}
+
+.mapview__close-icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+
+.mapview__ends {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 16px 64px 16px 24px;
+}
+
+.mapview__end {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.mapview__end label {
+  display: block;
+}
+
+.mapview__end-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 3px solid var(--teal-800);
+  background: #fff;
+}
+
+.mapview__end-dot--to {
+  border-color: var(--sand);
+  background: var(--sand);
+}
+
+.mapview__select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+}
+
+.mapview__swap {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  background: #fff;
+}
+
+.mapview__swap-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mapview__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 24px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mapview__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  font-size: 12px;
+  transition: background-color 0.25s var(--ease), color 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+
+.mapview__chip[aria-pressed='true'] {
+  background: var(--teal-800);
+  border-color: var(--teal-800);
+  color: var(--paper-2);
+}
+
+.mapview__chip-icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mapview__summary {
+  padding: 16px 24px 12px;
+}
+
+.mapview__time {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 34px;
+  line-height: 1.05;
+  color: var(--teal);
+}
+
+.mapview__dist {
+  margin: 2px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.mapview__via,
+.mapview__msg {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.mapview__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0 24px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+}
+
+.mapview__step {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.mapview__step-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mapview__step[data-turn='arrive'] .mapview__step-icon {
+  stroke: var(--sand);
+}
+
+.mapview__step-dist {
+  font-size: 12px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.mapview__note {
+  margin: 0;
+  padding: 10px 24px 14px;
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
 
 /* ── mobile ──────────────────────────────────────────────────────────────── */
 
@@ -2975,6 +3443,107 @@ a {
 
   .minimap__caption small {
     font-size: 9px;
+  }
+
+
+  .minimap__open {
+    height: 26px;
+    padding: 0 8px;
+    font-size: 8px;
+    gap: 5px;
+  }
+
+  /* map view: map on top, directions as a bottom sheet */
+  .mapview__panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 52dvh;
+    border-width: 1px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mapview__head {
+    padding: 14px 16px 10px;
+  }
+
+  .mapview__title {
+    font-size: 22px;
+  }
+
+  .mapview__close {
+    top: 8px;
+    right: 8px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .mapview__ends {
+    padding: 12px 60px 12px 16px;
+    gap: 6px;
+  }
+
+  .mapview__select {
+    height: 40px;
+    font-size: 16px; /* no zoom-on-focus on iOS */
+  }
+
+  .mapview__quick {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 0 16px 12px;
+    scrollbar-width: none;
+  }
+
+  .mapview__chip {
+    flex: none;
+  }
+
+  .mapview__summary {
+    padding: 12px 16px 8px;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .mapview__time {
+    font-size: 28px;
+  }
+
+  .mapview__via {
+    width: 100%;
+  }
+
+  .mapview__steps {
+    padding: 0 16px;
+  }
+
+  .mapview__note {
+    padding: 8px 16px 10px;
+  }
+
+  .mapview__controls {
+    right: 12px;
+    top: auto;
+    bottom: calc(52dvh + 12px);
+    grid-auto-flow: column; /* + − ⌖ side by side, low on the map */
+  }
+
+  .mapview__ctl + .mapview__ctl {
+    border-top: 0;
+    border-left: 1px solid var(--line);
+  }
+
+  .mapview__ctl {
+    width: 40px;
+    height: 40px;
+  }
+
+  .mapview__tag {
+    font-size: 10px;
   }
 
   /* details → bottom sheet */

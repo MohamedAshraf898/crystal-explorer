@@ -9,6 +9,7 @@ import { createFilters } from './ui/filters.js';
 import { createFloorNav } from './ui/floorNav.js';
 import { createFloorPanel } from './ui/floorPanel.js';
 import { createFloorTitle } from './ui/floorTitle.js';
+import { createMapView } from './ui/mapView.js';
 import { createMinimap } from './ui/minimap.js';
 import { createBackButton, createHint, createLiveRegion, createLoader } from './ui/misc.js';
 import { createTooltip } from './ui/tooltip.js';
@@ -37,6 +38,7 @@ async function main() {
 
   // UI layer
   const ui = h('div', { className: 'ui' });
+  const mapView = createMapView();
   const topBar = createTopBar(store);
   const filters = createFilters(store);
   const compare = createCompare(store);
@@ -52,8 +54,9 @@ async function main() {
     filters.panel,
     compare.tray,
     compare.view,
+    mapView.element,
     createHint(store),
-    createMinimap(store),
+    createMinimap(store, { onOpen: (place) => mapView.open(place) }),
     createLiveRegion(store),
   );
   app.append(ui);

@@ -39,7 +39,7 @@ function distanceKm(a, b) {
   return 2 * R * Math.asin(Math.sqrt(s));
 }
 
-export function createMinimap(store) {
+export function createMinimap(store, { onOpen } = {}) {
   const mapKm = (cfg.bounds.east - cfg.bounds.west) * 111.32 * Math.cos((cfg.site.lat * Math.PI) / 180);
   const pxPerKm = cfg.width / mapKm; // image pixels per km
   const [sx, sy] = project(cfg.site);
@@ -66,7 +66,8 @@ export function createMinimap(store) {
         type: 'button',
         className: `minimap__blip minimap__blip--${p.kind}${p.grow ? ' minimap__blip--grow' : ''}`,
         'aria-label': `${p.name}, ${where}`,
-        onClick: () => select(selected === b ? null : b),
+        // tap a place: open the full map with directions to it
+        onClick: () => (onOpen ? onOpen(p.grow ? null : p.name) : select(selected === b ? null : b)),
         onMouseEnter: () => show(b),
         onMouseLeave: () => show(selected),
         onFocus: () => show(b),
@@ -101,13 +102,17 @@ export function createMinimap(store) {
   const zoomIn = h('button', { type: 'button', className: 'minimap__zoom', 'aria-label': 'Zoom map in', onClick: () => zoomTo(step - 1) }, '+');
   const zoomOut = h('button', { type: 'button', className: 'minimap__zoom', 'aria-label': 'Zoom map out', onClick: () => zoomTo(step + 1) }, '−');
 
-  const ring = h('div', { className: 'minimap__ring' }, disc, center, north, ...blips.map((b) => b.el));
+  // the circle itself opens the full map
+  const discBtn = h('button', { type: 'button', className: 'minimap__open-area', 'aria-label': 'Open the map with directions', onClick: () => onOpen?.() });
+  const ring = h('div', { className: 'minimap__ring' }, disc, discBtn, center, north, ...blips.map((b) => b.el));
+  const openBtn = h('button', { type: 'button', className: 'minimap__open', onClick: () => onOpen?.() }, svgIcon('<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>', 'minimap__open-icon'), 'Map & directions');
   const root = h(
     'section',
     { className: 'minimap', 'aria-label': `Area map around ${cfg.site.name}` },
     ring,
     caption,
     h('div', { className: 'minimap__bar' }, zoomIn, scale, zoomOut),
+    onOpen && openBtn,
     h('p', { className: 'minimap__credit' }, cfg.credit),
   );
   root.inert = true;
