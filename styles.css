@@ -2238,9 +2238,9 @@ a {
   inset: 0;
   border-radius: 50%;
   overflow: hidden;
-  background: #18323a;
-  border: 3px solid var(--teal-800);
-  box-shadow: 0 0 0 1px var(--sand), 0 14px 34px -14px rgba(8, 22, 28, 0.55);
+  background: #f0ece5;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px var(--line-strong), 0 14px 34px -14px rgba(8, 22, 28, 0.4);
   /* Safari: keep the rounded clip on the transformed child */
   -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
@@ -2270,14 +2270,14 @@ a {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 2px var(--teal-900), 0 0 0 9px rgba(255, 255, 255, 0.16);
+  background: var(--teal-800);
+  box-shadow: 0 0 0 3px #fff, 0 0 0 9px rgba(29, 68, 82, 0.16);
 }
 
 .minimap__me-icon {
   width: 13px;
   height: 13px;
-  fill: var(--teal-800);
+  fill: #fff;
 }
 
 .minimap__north {
@@ -2289,9 +2289,9 @@ a {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #fff;
-  color: var(--teal-900);
-  box-shadow: 0 0 0 2px var(--teal-800);
+  background: var(--teal-800);
+  color: #fff;
+  box-shadow: 0 0 0 2px #fff;
   font-size: 9.5px;
   font-weight: 600;
   pointer-events: none;
@@ -2307,7 +2307,7 @@ a {
   place-items: center;
   border-radius: 50%;
   background: var(--sand);
-  box-shadow: 0 0 0 2px var(--teal-900), 0 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 2px #fff, 0 3px 8px rgba(8, 22, 28, 0.28);
   transition: box-shadow 0.25s var(--ease);
 }
 
@@ -2315,7 +2315,7 @@ a {
 .minimap__blip:focus-visible,
 .minimap__blip[data-open] {
   z-index: 2;
-  box-shadow: 0 0 0 2px var(--teal-900), 0 0 0 5px rgba(196, 167, 122, 0.55), 0 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px rgba(196, 167, 122, 0.5), 0 3px 8px rgba(8, 22, 28, 0.28);
 }
 
 /* off the map: smaller, on the rim */
@@ -2347,8 +2347,8 @@ a {
   z-index: 0;
   align-items: start;
   padding-top: 6%;
-  background: rgba(196, 167, 122, 0.9);
-  box-shadow: 0 0 0 2px var(--teal-900), 0 0 0 6px rgba(196, 167, 122, 0.25);
+  background: rgba(196, 167, 122, 0.85);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 6px rgba(196, 167, 122, 0.25);
   transition: none;
 }
 

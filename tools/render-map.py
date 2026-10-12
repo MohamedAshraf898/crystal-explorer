@@ -20,13 +20,20 @@ def px(lat, lon):
     x, y = merc(lat, lon)
     return ((x - x0) / (x1 - x0) * w, (y - y0) / (y1 - y0) * h)
 d = json.load(open(sys.argv[2] if len(sys.argv) > 2 else 'data.json'))['elements']
-MINI = len(sys.argv) > 3 and sys.argv[3] == 'mini'
+STYLE = sys.argv[3] if len(sys.argv) > 3 else ''
+MINI = STYLE in ('mini', 'minilight')
 C = {
   'land': (238, 234, 227), 'sea': (205, 218, 217), 'water': (196, 212, 212), 'sand': (232, 223, 204),
   'green': (221, 226, 210), 'pool': (190, 210, 212), 'building': (226, 221, 211), 'bline': (212, 205, 193),
   'casing': (214, 206, 192), 'major': (255, 255, 255), 'minor': (250, 248, 244), 'foot': (226, 220, 210), 'constr': (230, 225, 216),
 }
-if MINI:  # dark, high-contrast minimap (GTA-like)
+if STYLE == 'minilight':  # light minimap: paper land, soft sea, white roads with sand edges
+    C.update({
+      'land': (240, 236, 229), 'sea': (190, 212, 214), 'water': (190, 212, 214), 'sand': (232, 222, 200),
+      'green': (214, 224, 204), 'pool': (178, 206, 212), 'building': (226, 219, 207), 'bline': (214, 205, 190),
+      'casing': (205, 181, 140), 'major': (255, 255, 255), 'minor': (255, 255, 255), 'foot': (230, 224, 214), 'constr': (232, 227, 218),
+    })
+elif MINI:  # dark, high-contrast minimap (GTA-like)
     C.update({
       'land': (24, 50, 58), 'sea': (12, 33, 41), 'water': (16, 44, 54), 'sand': (42, 66, 70),
       'green': (34, 70, 62), 'pool': (40, 92, 104), 'building': (38, 66, 74), 'bline': (46, 76, 84),

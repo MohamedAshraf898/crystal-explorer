@@ -21,7 +21,7 @@ export const project = {
 
 /**
  * MINIMAP — the round, GTA-style map at the bottom of the floor page.
- * Drawn locally from OpenStreetMap data (tools/render-map.py): no Google,
+ * Light style, drawn locally from OpenStreetMap data (tools/render-map.py minilight): no Google,
  * no live map service. Everything is in real coordinates.
  *   bounds: edges of the map image (Web Mercator)
  *   site:   the building, always in the centre
